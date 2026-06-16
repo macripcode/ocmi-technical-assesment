@@ -16,6 +16,8 @@ model Employee {
 
   timeEntries TimeEntry[]
 
+  deactivatedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -59,7 +59,9 @@
     "api"
   ],
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "hono": "^4.12.25",
+    "prisma": "^6.19.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   }

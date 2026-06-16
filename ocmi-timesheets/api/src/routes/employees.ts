@@ -26,6 +26,28 @@ employeesRoutes.post('/', async (c) => {
   return c.json(employee, 201);
 });
 
+employeesRoutes.patch('/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json();
+
+  const employee = await prisma.employee.findUnique({ where: { id } });
+
+  if (!employee) {
+    return c.json({ message: 'Employee not found' }, 404);
+  }
+
+  const updated = await prisma.employee.update({
+    where: { id },
+    data: {
+      name: body.name,
+      role: body.role,
+      hourlyRate: body.hourlyRate !== undefined ? Number(body.hourlyRate) : undefined,
+    },
+  });
+
+  return c.json(updated);
+});
+
 employeesRoutes.delete('/:id', async (c) => {
   const id = c.req.param('id');
 

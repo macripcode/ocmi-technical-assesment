@@ -1,0 +1,11 @@
+{
+  "name": "@ocmi-timesheets/shared",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": {
+      "@ocmi-timesheets/source": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}

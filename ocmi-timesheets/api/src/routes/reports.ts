@@ -12,9 +12,23 @@ type WeeklySummaryItem = {
 export const reportsRoutes = new Hono();
 
 reportsRoutes.get('/weekly', async (c) => {
+  const startDateParam = c.req.query('startDate');
+
+  if (!startDateParam) {
+    return c.json({ message: 'startDate query parameter is required' }, 400);
+  }
+
+  const startDate = new Date(startDateParam);
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 7);
+
   const entries = await prisma.timeEntry.findMany({
     where: {
       status: 'APPROVED',
+      date: {
+        gte: startDate,
+        lt: endDate,
+      },
     },
     include: {
       employee: true,
@@ -40,5 +54,9 @@ reportsRoutes.get('/weekly', async (c) => {
     return acc;
   }, []);
 
-  return c.json(summary);
+  return c.json({
+    startDate,
+    endDate,
+    summary,
+  });
 });

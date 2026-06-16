@@ -17,6 +17,7 @@ employeesRoutes.post('/', async (c) => {
       name: body.name,
       role: body.role,
       hourlyRate: Number(body.hourlyRate),
+      status: body.status,
     },
   });
 

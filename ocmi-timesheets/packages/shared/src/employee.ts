@@ -1,3 +1,6 @@
+import type { z } from 'zod';
+import type { CreateEmployeeSchema, UpdateEmployeeSchema } from './schemas/employee.schema.ts';
+
 export type EmployeeStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface Employee {
@@ -11,9 +14,5 @@ export interface Employee {
   updatedAt: Date;
 }
 
-export interface CreateEmployeeInput {
-  name: string;
-  role: string;
-  hourlyRate: number;
-  status?: EmployeeStatus;
-}
+export type CreateEmployeeInput = z.infer<typeof CreateEmployeeSchema>;
+export type UpdateEmployeeInput = z.infer<typeof UpdateEmployeeSchema>;

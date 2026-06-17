@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { prisma } from '../lib/prisma';
-import { getWeekStart } from '@ocmi-timesheets/shared';
+import { getWeekStart, CreateTimeEntrySchema, UpdateTimeEntrySchema } from '@ocmi-timesheets/shared';
 
 export const timeEntriesRoutes = new Hono();
 
@@ -15,17 +15,17 @@ timeEntriesRoutes.get('/', async (c) => {
 });
 
 timeEntriesRoutes.post('/', async (c) => {
-  const body = await c.req.json();
+  const result = CreateTimeEntrySchema.safeParse(await c.req.json());
 
-  const weekStart = getWeekStart(new Date(body.date));
+  if (!result.success) {
+    return c.json({ message: 'Invalid request', errors: result.error.issues }, 400);
+  }
+
+  const { employeeId, date, hoursWorked, notes } = result.data;
+  const weekStart = getWeekStart(new Date(date));
 
   const lockedTimesheet = await prisma.weeklyTimesheet.findUnique({
-    where: {
-      employeeId_weekStart: {
-        employeeId: body.employeeId,
-        weekStart,
-      },
-    },
+    where: { employeeId_weekStart: { employeeId, weekStart } },
   });
 
   if (lockedTimesheet?.status === 'APPROVED') {
@@ -33,12 +33,7 @@ timeEntriesRoutes.post('/', async (c) => {
   }
 
   const entry = await prisma.timeEntry.create({
-    data: {
-      employeeId: body.employeeId,
-      date: new Date(body.date),
-      hoursWorked: body.hoursWorked,
-      notes: body.notes,
-    },
+    data: { employeeId, date: new Date(date), hoursWorked, notes },
   });
 
   return c.json(entry, 201);
@@ -46,7 +41,11 @@ timeEntriesRoutes.post('/', async (c) => {
 
 timeEntriesRoutes.patch('/:id', async (c) => {
   const id = c.req.param('id');
-  const body = await c.req.json();
+  const result = UpdateTimeEntrySchema.safeParse(await c.req.json());
+
+  if (!result.success) {
+    return c.json({ message: 'Invalid request', errors: result.error.issues }, 400);
+  }
 
   const entry = await prisma.timeEntry.findUnique({ where: { id } });
 
@@ -55,8 +54,8 @@ timeEntriesRoutes.patch('/:id', async (c) => {
   }
 
   const weekStarts = [getWeekStart(entry.date)];
-  if (body.date !== undefined) {
-    const newWeekStart = getWeekStart(new Date(body.date));
+  if (result.data.date !== undefined) {
+    const newWeekStart = getWeekStart(new Date(result.data.date));
     if (newWeekStart.getTime() !== weekStarts[0].getTime()) {
       weekStarts.push(newWeekStart);
     }
@@ -77,9 +76,9 @@ timeEntriesRoutes.patch('/:id', async (c) => {
   const updated = await prisma.timeEntry.update({
     where: { id },
     data: {
-      date: body.date !== undefined ? new Date(body.date) : undefined,
-      hoursWorked: body.hoursWorked,
-      notes: body.notes,
+      date: result.data.date !== undefined ? new Date(result.data.date) : undefined,
+      hoursWorked: result.data.hoursWorked,
+      notes: result.data.notes,
     },
   });
 

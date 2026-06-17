@@ -1,4 +1,6 @@
+import type { z } from 'zod';
 import type { Employee } from './employee.ts';
+import type { CreateTimeEntrySchema, UpdateTimeEntrySchema } from './schemas/time-entry.schema.ts';
 
 export interface TimeEntry {
   id: string;
@@ -14,9 +16,5 @@ export interface TimeEntryWithEmployee extends TimeEntry {
   employee: Employee;
 }
 
-export interface CreateTimeEntryInput {
-  employeeId: string;
-  date: string;
-  hoursWorked: number;
-  notes?: string;
-}
+export type CreateTimeEntryInput = z.infer<typeof CreateTimeEntrySchema>;
+export type UpdateTimeEntryInput = z.infer<typeof UpdateTimeEntrySchema>;

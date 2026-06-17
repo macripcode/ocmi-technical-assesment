@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { prisma } from '../lib/prisma';
+import { CreateEmployeeSchema, UpdateEmployeeSchema } from '@ocmi-timesheets/shared';
 
 export const employeesRoutes = new Hono();
 
@@ -12,15 +13,14 @@ employeesRoutes.get('/', async (c) => {
 });
 
 employeesRoutes.post('/', async (c) => {
-  const body = await c.req.json();
+  const result = CreateEmployeeSchema.safeParse(await c.req.json());
+
+  if (!result.success) {
+    return c.json({ message: 'Invalid request', errors: result.error.issues }, 400);
+  }
 
   const employee = await prisma.employee.create({
-    data: {
-      name: body.name,
-      role: body.role,
-      hourlyRate: Number(body.hourlyRate),
-      status: body.status,
-    },
+    data: result.data,
   });
 
   return c.json(employee, 201);
@@ -28,7 +28,11 @@ employeesRoutes.post('/', async (c) => {
 
 employeesRoutes.patch('/:id', async (c) => {
   const id = c.req.param('id');
-  const body = await c.req.json();
+  const result = UpdateEmployeeSchema.safeParse(await c.req.json());
+
+  if (!result.success) {
+    return c.json({ message: 'Invalid request', errors: result.error.issues }, 400);
+  }
 
   const employee = await prisma.employee.findUnique({ where: { id } });
 
@@ -38,11 +42,7 @@ employeesRoutes.patch('/:id', async (c) => {
 
   const updated = await prisma.employee.update({
     where: { id },
-    data: {
-      name: body.name,
-      role: body.role,
-      hourlyRate: body.hourlyRate !== undefined ? Number(body.hourlyRate) : undefined,
-    },
+    data: result.data,
   });
 
   return c.json(updated);

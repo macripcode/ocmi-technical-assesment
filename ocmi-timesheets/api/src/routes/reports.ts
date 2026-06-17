@@ -1,13 +1,6 @@
 import { Hono } from 'hono';
 import { prisma } from '../lib/prisma';
-
-type WeeklySummaryItem = {
-  employeeId: string;
-  employeeName: string;
-  totalHours: number;
-  hourlyRate: number;
-  totalPay: number;
-};
+import { getWeekStart, calculateWeeklySummary } from '@ocmi-timesheets/shared';
 
 export const reportsRoutes = new Hono();
 
@@ -18,45 +11,68 @@ reportsRoutes.get('/weekly', async (c) => {
     return c.json({ message: 'startDate query parameter is required' }, 400);
   }
 
-  const startDate = new Date(startDateParam);
-  const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 7);
+  const weekStart = getWeekStart(new Date(startDateParam));
+  const weekEnd = new Date(weekStart);
+  weekEnd.setUTCDate(weekStart.getUTCDate() + 7);
 
-  const entries = await prisma.timeEntry.findMany({
-    where: {
-      status: 'APPROVED',
-      date: {
-        gte: startDate,
-        lt: endDate,
+  const [entries, timesheets] = await Promise.all([
+    prisma.timeEntry.findMany({
+      where: {
+        date: { gte: weekStart, lt: weekEnd },
       },
-    },
-    include: {
-      employee: true,
-    },
-  });
+      include: { employee: true },
+    }),
+    prisma.weeklyTimesheet.findMany({
+      where: { weekStart },
+    }),
+  ]);
 
-  const summary = entries.reduce<WeeklySummaryItem[]>((acc, entry) => {
-    const existing = acc.find((item) => item.employeeId === entry.employeeId);
+  const timesheetByEmployee = new Map(
+    timesheets.map((t) => [t.employeeId, t.status])
+  );
 
+  const summaryMap = new Map<
+    string,
+    {
+      employeeId: string;
+      employeeName: string;
+      hourlyRate: number;
+      totalHours: number;
+    }
+  >();
+
+  for (const entry of entries) {
+    const existing = summaryMap.get(entry.employeeId);
     if (existing) {
       existing.totalHours += entry.hoursWorked;
-      existing.totalPay += entry.hoursWorked * entry.employee.hourlyRate;
     } else {
-      acc.push({
+      summaryMap.set(entry.employeeId, {
         employeeId: entry.employeeId,
         employeeName: entry.employee.name,
-        totalHours: entry.hoursWorked,
         hourlyRate: entry.employee.hourlyRate,
-        totalPay: entry.hoursWorked * entry.employee.hourlyRate,
+        totalHours: entry.hoursWorked,
       });
     }
+  }
 
-    return acc;
-  }, []);
+  const summary = Array.from(summaryMap.values()).map(
+    ({ employeeId, employeeName, hourlyRate, totalHours }) => {
+      const { regularHours, overtimeHours, totalPay } = calculateWeeklySummary(
+        totalHours,
+        hourlyRate
+      );
+      return {
+        employeeId,
+        employeeName,
+        hourlyRate,
+        totalHours,
+        regularHours,
+        overtimeHours,
+        totalPay,
+        approvalStatus: timesheetByEmployee.get(employeeId) ?? 'PENDING',
+      };
+    }
+  );
 
-  return c.json({
-    startDate,
-    endDate,
-    summary,
-  });
+  return c.json({ weekStart, weekEnd, summary });
 });

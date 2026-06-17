@@ -8,13 +8,14 @@ datasource db {
 }
 
 model Employee {
-  id         String      @id @default(uuid())
+  id         String         @id @default(uuid())
   name       String
   role       String
   hourlyRate Float
   status     EmployeeStatus @default(ACTIVE)
 
-  timeEntries TimeEntry[]
+  timeEntries      TimeEntry[]
+  weeklyTimesheets WeeklyTimesheet[]
 
   deactivatedAt DateTime?
 
@@ -32,19 +33,30 @@ model TimeEntry {
   hoursWorked Float
   notes       String?
 
-  status TimeEntryStatus @default(PENDING)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-enum TimeEntryStatus {
-  PENDING
-  APPROVED
-  REJECTED
+model WeeklyTimesheet {
+  id         String                @id @default(uuid())
+  employeeId String
+  employee   Employee              @relation(fields: [employeeId], references: [id])
+  weekStart  DateTime
+  status     WeeklyTimesheetStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, weekStart])
 }
 
 enum EmployeeStatus {
   ACTIVE
   INACTIVE
+}
+
+enum WeeklyTimesheetStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { prisma } from '../lib/prisma';
+import { getWeekStart } from '@ocmi-timesheets/shared';
 
 export const timeEntriesRoutes = new Hono();
 
@@ -16,6 +17,21 @@ timeEntriesRoutes.get('/', async (c) => {
 timeEntriesRoutes.post('/', async (c) => {
   const body = await c.req.json();
 
+  const weekStart = getWeekStart(new Date(body.date));
+
+  const lockedTimesheet = await prisma.weeklyTimesheet.findUnique({
+    where: {
+      employeeId_weekStart: {
+        employeeId: body.employeeId,
+        weekStart,
+      },
+    },
+  });
+
+  if (lockedTimesheet?.status === 'APPROVED') {
+    return c.json({ message: 'This week is approved and locked' }, 409);
+  }
+
   const entry = await prisma.timeEntry.create({
     data: {
       employeeId: body.employeeId,
@@ -26,30 +42,4 @@ timeEntriesRoutes.post('/', async (c) => {
   });
 
   return c.json(entry, 201);
-});
-
-timeEntriesRoutes.patch('/:id/approve', async (c) => {
-  const id = c.req.param('id');
-
-  const entry = await prisma.timeEntry.update({
-    where: { id },
-    data: {
-      status: 'APPROVED',
-    },
-  });
-
-  return c.json(entry);
-});
-
-timeEntriesRoutes.patch('/:id/reject', async (c) => {
-  const id = c.req.param('id');
-
-  const entry = await prisma.timeEntry.update({
-    where: { id },
-    data: {
-      status: 'REJECTED',
-    },
-  });
-
-  return c.json(entry);
 });

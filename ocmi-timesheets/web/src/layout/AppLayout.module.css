@@ -1,0 +1,103 @@
+.root {
+  display:        flex;
+  flex-direction: column;
+  min-height:     100vh;
+}
+
+/* ─── Nav bar ─────────────────────────────────────────────────────── */
+.nav {
+  background-color: var(--color-nav-bg);
+  border-bottom:    1px solid var(--color-nav-border);
+  box-shadow:       var(--shadow-sm);
+  position:         sticky;
+  top:              0;
+  z-index:          var(--z-dropdown);
+  transition:       background-color var(--transition-slow);
+}
+
+.navInner {
+  display:         flex;
+  align-items:     center;
+  max-width:       72rem;
+  margin:          0 auto;
+  padding:         0 var(--space-6);
+  height:          3.5rem;
+  gap:             var(--space-2);
+}
+
+.brand {
+  font-size:   var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color:       var(--color-text);
+  margin-right: var(--space-4);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* ─── Tab group ───────────────────────────────────────────────────── */
+.tabs {
+  display:    flex;
+  align-items:stretch;
+  gap:        0;
+  flex:       1;
+}
+
+.tab {
+  position:         relative;
+  display:          inline-flex;
+  align-items:      center;
+  padding:          0 var(--space-4);
+  height:           3.5rem;
+  font-size:        var(--font-size-sm);
+  font-weight:      var(--font-weight-medium);
+  color:            var(--color-text-muted);
+  background-color: transparent;
+  border:           none;
+  cursor:           pointer;
+  white-space:      nowrap;
+  transition:       color var(--transition-fast);
+}
+
+.tab::after {
+  content:          '';
+  position:         absolute;
+  bottom:           0;
+  left:             var(--space-4);
+  right:            var(--space-4);
+  height:           2px;
+  border-radius:    var(--radius-full) var(--radius-full) 0 0;
+  background-color: transparent;
+  transition:       background-color var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--color-text);
+}
+
+.tabActive {
+  color: var(--color-tab-active);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tabActive::after {
+  background-color: var(--color-tab-active);
+}
+
+/* ─── Nav controls ────────────────────────────────────────────────── */
+.controls {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-3);
+  margin-left: auto;
+}
+
+/* ─── Main content ────────────────────────────────────────────────── */
+.main {
+  flex:    1;
+  padding: var(--space-8) var(--space-6);
+}
+
+.content {
+  max-width: 72rem;
+  margin:    0 auto;
+}

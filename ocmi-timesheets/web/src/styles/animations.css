@@ -1,0 +1,30 @@
+/* ─── Keyframes ───────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0);     }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+
+/* ─── Utility animation classes ──────────────────────────────────── */
+.animate-fadeIn  { animation: fadeIn  var(--transition-slow) ease both; }
+.animate-slideUp { animation: slideUp var(--transition-slow) ease both; }
+.animate-scaleIn { animation: scaleIn var(--transition-slow) ease both; }

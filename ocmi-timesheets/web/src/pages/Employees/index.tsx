@@ -30,10 +30,8 @@ function sortEmployees(list: Employee[], field: SortField, dir: SortDir): Employ
   });
 }
 
-// ── Constants ─────────────────────────────────────────────────────────
 const PAGE_SIZE = 10;
 
-// ── Form state ───────────────────────────────────────────────────────
 interface FormState {
   open:      boolean;
   employee?: Employee;
@@ -51,6 +49,14 @@ export function EmployeesPage() {
   const [sortField,    setSortField]    = useState<SortField>('name');
   const [sortDir,      setSortDir]      = useState<SortDir>('asc');
   const [page,         setPage]         = useState(1);
+  const [toast,        setToast]        = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+
+  // ── Auto-dismiss toast ────────────────────────────────────────────
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   // ── Load employees ────────────────────────────────────────────────
   useEffect(() => {
@@ -74,56 +80,104 @@ export function EmployeesPage() {
   const paginated  = sorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   // ── Handlers ──────────────────────────────────────────────────────
-  function openAdd()  { setFormState({ open: true }); }
-  function openEdit(emp: Employee) { setFormState({ open: true, employee: emp }); }
-  function closeForm() { setFormState({ open: false }); }
+  function openAdd()                    { setFormState({ open: true }); }
+  function openEdit(emp: Employee)      { setFormState({ open: true, employee: emp }); }
+  function closeForm()                  { setFormState({ open: false }); }
+  function handleSortField(f: SortField){ setSortField(f); setSortDir('asc'); setPage(1); }
 
-  function handleSortField(field: SortField) {
-    setSortField(field);
-    setSortDir('asc');
-    setPage(1);
-  }
-
+  // ── Create / Edit ─────────────────────────────────────────────────
   async function handleFormSave(data: { name: string; lastName: string; hourlyRate: number }) {
-    try {
-      if (formState.employee) {
-        const updated = await updateEmployee(formState.employee.id, data);
+    closeForm();
+
+    // ── Edit: only send changed fields ───────────────────────────
+    if (formState.employee) {
+      const original = formState.employee;
+      const patch: { name?: string; lastName?: string; hourlyRate?: number } = {};
+      if (data.name       !== original.name)       patch.name       = data.name;
+      if (data.lastName   !== original.lastName)   patch.lastName   = data.lastName;
+      if (data.hourlyRate !== original.hourlyRate) patch.hourlyRate = data.hourlyRate;
+
+      if (Object.keys(patch).length === 0) return;
+
+      // Optimistic update
+      const optimistic: Employee = { ...original, ...patch, updatedAt: new Date() };
+      setEmployees((prev) => prev.map((e) => (e.id === original.id ? optimistic : e)));
+
+      try {
+        const updated = await updateEmployee(original.id, patch);
         setEmployees((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
-      } else {
-        const created = await createEmployee(data);
-        setEmployees((prev) => {
-          const next = [...prev, created];
-          // Jump to the last page so the new employee is visible
-          setPage(Math.ceil(next.length / PAGE_SIZE));
-          return next;
-        });
+      } catch {
+        setEmployees((prev) => prev.map((e) => (e.id === original.id ? original : e)));
+        setToast({ type: 'error', message: 'No se pudo actualizar el empleado.' });
       }
-      closeForm();
+      return;
+    }
+
+    // ── Create: optimistic insert ────────────────────────────────
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: Employee = {
+      id:         tempId,
+      name:       data.name,
+      lastName:   data.lastName,
+      hourlyRate: data.hourlyRate,
+      status:     'ACTIVE',
+      createdAt:  new Date(),
+      updatedAt:  new Date(),
+    };
+
+    setEmployees((prev) => {
+      const next = [...prev, optimistic];
+      setPage(Math.ceil(next.length / PAGE_SIZE));
+      return next;
+    });
+
+    try {
+      const created = await createEmployee(data);
+      setEmployees((prev) => prev.map((e) => (e.id === tempId ? created : e)));
     } catch {
-      alert('Error saving employee. Please try again.');
+      setEmployees((prev) => prev.filter((e) => e.id !== tempId));
+      setToast({ type: 'error', message: 'No se pudo crear el empleado.' });
     }
   }
 
+  // ── Deactivate: optimistic, then PATCH via DELETE endpoint ───────
   async function handleDeactivate(emp: Employee) {
+    // Optimistic: hide from active list or mark inactive
+    setEmployees((prev) => {
+      if (showInactive) {
+        return prev.map((e) =>
+          e.id === emp.id ? { ...e, status: 'INACTIVE' as const, updatedAt: new Date() } : e
+        );
+      }
+      const next = prev.filter((e) => e.id !== emp.id);
+      setPage((p) => Math.min(p, Math.max(1, Math.ceil(next.length / PAGE_SIZE))));
+      return next;
+    });
+
     try {
-      const deactivated = await deactivateEmployee(emp.id);
-      setEmployees((prev) => {
-        const next = showInactive
-          ? prev.map((e) => (e.id === emp.id ? deactivated : e))
-          : prev.filter((e) => e.id !== emp.id);
-        // If current page becomes empty after removal, go back one page
-        const newTotal = Math.max(1, Math.ceil(next.length / PAGE_SIZE));
-        setPage((p) => Math.min(p, newTotal));
-        return next;
-      });
+      await deactivateEmployee(emp.id);
     } catch {
-      alert('Error deactivating employee. Please try again.');
+      // Revert
+      setEmployees((prev) =>
+        showInactive
+          ? prev.map((e) => (e.id === emp.id ? emp : e))
+          : [...prev, emp]
+      );
+      setToast({ type: 'error', message: 'No se pudo desactivar el empleado.' });
     }
   }
 
   // ── Render ────────────────────────────────────────────────────────
   return (
     <div className={styles.page}>
+
+      {/* ── Toast ──────────────────────────────────────────────── */}
+      {toast && (
+        <div className={`${styles.toast} ${toast.type === 'error' ? styles.toastError : styles.toastSuccess}`}>
+          {toast.message}
+          <button className={styles.toastClose} onClick={() => setToast(null)} aria-label="Close">×</button>
+        </div>
+      )}
 
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className={styles.header}>
@@ -179,7 +233,7 @@ export function EmployeesPage() {
       {loading && <p className={styles.feedback}>Loading…</p>}
       {error   && <p className={styles.feedbackError}>{error}</p>}
 
-      {/* ── Employee list ──────────────────────────────────────── */}
+      {/* ── List + pagination ──────────────────────────────────── */}
       {!loading && !error && (
         <>
           <EmployeeTable
@@ -189,7 +243,6 @@ export function EmployeesPage() {
             onReactivate={() => {}}
           />
 
-          {/* ── Pagination ───────────────────────────────────── */}
           {totalPages > 1 && (
             <div className={styles.pagination}>
               <button
@@ -197,9 +250,7 @@ export function EmployeesPage() {
                 onClick={() => setPage((p) => p - 1)}
                 disabled={safePage === 1}
                 aria-label="Previous page"
-              >
-                ‹
-              </button>
+              >‹</button>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
                 <button
@@ -207,9 +258,7 @@ export function EmployeesPage() {
                   className={`${styles.pageBtn} ${n === safePage ? styles.pageBtnActive : ''}`}
                   onClick={() => setPage(n)}
                   aria-current={n === safePage ? 'page' : undefined}
-                >
-                  {n}
-                </button>
+                >{n}</button>
               ))}
 
               <button
@@ -217,14 +266,13 @@ export function EmployeesPage() {
                 onClick={() => setPage((p) => p + 1)}
                 disabled={safePage === totalPages}
                 aria-label="Next page"
-              >
-                ›
-              </button>
+              >›</button>
             </div>
           )}
         </>
       )}
 
+      {/* ── Form modal ─────────────────────────────────────────── */}
       {formState.open && (
         <EmployeeForm
           employee={formState.employee}

@@ -59,7 +59,7 @@ export function WeeklySummaryPage() {
       const weekEntries = mockTimeEntries.filter(
         (e) => e.employeeId === emp.id && e.date >= startISO && e.date <= endISO
       );
-      const totalHours  = weekEntries.reduce((s, e) => s + e.hours, 0);
+      const totalHours  = weekEntries.reduce((s, e) => s + e.hoursWorked, 0);
       const regular     = Math.min(totalHours, 40);
       const overtime    = Math.max(totalHours - 40, 0);
       const regularPay  = regular  * emp.hourlyRate;

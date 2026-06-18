@@ -7,7 +7,6 @@ export interface TimeEntry {
   employeeId: string;
   date: Date;
   hoursWorked: number;
-  notes: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

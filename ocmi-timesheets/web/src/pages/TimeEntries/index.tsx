@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TimeEntry } from '../../types/timeEntry';
 import { Button } from '../../components/Button';
+import { TimeEntryForm } from '../../components/TimeEntryForm';
 import { TimeEntryList } from '../../components/TimeEntryList';
 import { mockEmployees } from '../Employees/mockData';
 import { mockTimeEntries } from './mockData';
@@ -10,15 +10,18 @@ import styles from './TimeEntries.module.css';
 
 const PAGE_SIZE = 10;
 
+interface FormState {
+  open:   boolean;
+  entry?: TimeEntry;
+}
+
 export function TimeEntriesPage() {
   const { t } = useTranslation();
-  const dateRef = useRef<HTMLInputElement>(null);
 
-  const [entries, setEntries]                     = useState<TimeEntry[]>(mockTimeEntries);
+  const [entries,            setEntries]          = useState<TimeEntry[]>(mockTimeEntries);
   const [selectedEmployeeId, setSelectedEmployee] = useState(mockEmployees[0].id);
-  const [logDate, setLogDate]                     = useState('');
-  const [logHours, setLogHours]                   = useState('');
-  const [page, setPage]                           = useState(1);
+  const [formState,          setFormState]        = useState<FormState>({ open: false });
+  const [page,               setPage]             = useState(1);
 
   const visibleEntries = [...entries]
     .filter((e) => e.employeeId === selectedEmployeeId)
@@ -28,43 +31,50 @@ export function TimeEntriesPage() {
   const safePage   = Math.min(page, totalPages);
   const paginated  = visibleEntries.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
+  function openAdd()               { setFormState({ open: true }); }
+  function openEdit(e: TimeEntry)  { setFormState({ open: true, entry: e }); }
+  function closeForm()             { setFormState({ open: false }); }
+
   function handleEmployeeChange(id: string) {
     setSelectedEmployee(id);
     setPage(1);
   }
 
-  function handleEdit(entry: TimeEntry) {
-    setLogDate(entry.date);
-    setLogHours(String(entry.hours));
-    setEntries((prev) => {
-      const next = prev.filter((e) => e.id !== entry.id);
-      setPage(Math.min(page, Math.max(1, Math.ceil(next.filter(e => e.employeeId === selectedEmployeeId).length / PAGE_SIZE))));
-      return next;
-    });
-    dateRef.current?.focus();
+  function handleSave(data: { date: string; hoursWorked: number }) {
+    const now = new Date().toISOString();
+    if (formState.entry) {
+      // Edit: replace existing entry
+      setEntries((prev) =>
+        prev.map((e) => e.id === formState.entry!.id ? { ...e, ...data, updatedAt: now } : e)
+      );
+    } else {
+      // Create: append new entry and jump to last page
+      setEntries((prev) => {
+        const next = [...prev, {
+          id:          `te-${Date.now()}`,
+          employeeId:  selectedEmployeeId,
+          date:        data.date,
+          hoursWorked: data.hoursWorked,
+          createdAt:   now,
+          updatedAt:   now,
+        }];
+        const employeeEntries = next.filter((e) => e.employeeId === selectedEmployeeId);
+        setPage(Math.ceil(employeeEntries.length / PAGE_SIZE));
+        return next;
+      });
+    }
+    closeForm();
   }
 
   function handleDelete(entry: TimeEntry) {
     setEntries((prev) => {
       const next = prev.filter((e) => e.id !== entry.id);
-      const newTotal = Math.max(1, Math.ceil(next.filter(e => e.employeeId === selectedEmployeeId).length / PAGE_SIZE));
+      const newTotal = Math.max(1, Math.ceil(
+        next.filter((e) => e.employeeId === selectedEmployeeId).length / PAGE_SIZE
+      ));
       setPage((p) => Math.min(p, newTotal));
       return next;
     });
-  }
-
-  function handleSave(e: FormEvent) {
-    e.preventDefault();
-    const hours = parseFloat(logHours);
-    if (!logDate || isNaN(hours) || hours <= 0) return;
-    setEntries((prev) => {
-      const next = [...prev, { id: `te-${Date.now()}`, employeeId: selectedEmployeeId, date: logDate, hours }];
-      const employeeEntries = next.filter(e => e.employeeId === selectedEmployeeId);
-      setPage(Math.ceil(employeeEntries.length / PAGE_SIZE));
-      return next;
-    });
-    setLogDate('');
-    setLogHours('');
   }
 
   return (
@@ -88,11 +98,7 @@ export function TimeEntriesPage() {
             </select>
           </label>
 
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => dateRef.current?.focus()}
-          >
+          <Button variant="primary" size="md" onClick={openAdd}>
             {t('timeEntries.addEntry')}
           </Button>
         </div>
@@ -101,7 +107,7 @@ export function TimeEntriesPage() {
       {/* ── Entry list ──────────────────────────────────────────── */}
       <TimeEntryList
         entries={paginated}
-        onEdit={handleEdit}
+        onEdit={openEdit}
         onDelete={handleDelete}
       />
 
@@ -113,9 +119,7 @@ export function TimeEntriesPage() {
             onClick={() => setPage((p) => p - 1)}
             disabled={safePage === 1}
             aria-label="Previous page"
-          >
-            ‹
-          </button>
+          >‹</button>
 
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
             <button
@@ -123,9 +127,7 @@ export function TimeEntriesPage() {
               className={`${styles.pageBtn} ${n === safePage ? styles.pageBtnActive : ''}`}
               onClick={() => setPage(n)}
               aria-current={n === safePage ? 'page' : undefined}
-            >
-              {n}
-            </button>
+            >{n}</button>
           ))}
 
           <button
@@ -133,51 +135,18 @@ export function TimeEntriesPage() {
             onClick={() => setPage((p) => p + 1)}
             disabled={safePage === totalPages}
             aria-label="Next page"
-          >
-            ›
-          </button>
+          >›</button>
         </div>
       )}
 
-      {/* ── Log time form ────────────────────────────────────────── */}
-      <section className={styles.logSection}>
-        <form className={styles.logForm} onSubmit={handleSave} noValidate>
-          <span className={styles.logLabel}>{t('timeEntries.form.label')}:</span>
-
-          <div className={styles.logFields}>
-            <label className={styles.field}>
-              <span className={styles.fieldLabel}>{t('timeEntries.form.date')}</span>
-              <input
-                ref={dateRef}
-                className={styles.input}
-                type="date"
-                value={logDate}
-                onChange={(e) => setLogDate(e.target.value)}
-                required
-              />
-            </label>
-
-            <label className={styles.field}>
-              <span className={styles.fieldLabel}>{t('timeEntries.form.hours')}</span>
-              <input
-                className={styles.input}
-                type="number"
-                step="0.5"
-                min="0.5"
-                max="24"
-                value={logHours}
-                onChange={(e) => setLogHours(e.target.value)}
-                placeholder="0.0"
-                required
-              />
-            </label>
-          </div>
-
-          <Button type="submit" variant="primary" size="md">
-            {t('timeEntries.form.save')}
-          </Button>
-        </form>
-      </section>
+      {/* ── Form modal ──────────────────────────────────────────── */}
+      {formState.open && (
+        <TimeEntryForm
+          entry={formState.entry}
+          onSave={handleSave}
+          onClose={closeForm}
+        />
+      )}
 
     </div>
   );

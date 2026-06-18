@@ -55,10 +55,13 @@ const es: Translations = {
     selectEmployee: 'Empleado',
     addEntry:       '+ Registrar tiempo',
     form: {
-      label: 'Registrar tiempo',
-      date:  'Fecha',
-      hours: 'Horas',
-      save:  'Guardar',
+      titleAdd:  'Registrar Tiempo',
+      titleEdit: 'Editar Registro',
+      label:     'Registrar tiempo',
+      date:      'Fecha',
+      hours:     'Horas',
+      save:      'Guardar',
+      cancel:    'Cancelar',
     },
     actions: {
       edit:   'Editar registro',

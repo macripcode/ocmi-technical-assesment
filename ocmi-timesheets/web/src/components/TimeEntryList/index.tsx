@@ -36,7 +36,7 @@ export function TimeEntryList({ entries, onEdit, onDelete }: TimeEntryListProps)
 
           <span className={styles.date}>{formatDate(entry.date)}</span>
 
-          <span className={styles.hours}>{entry.hours.toFixed(1)} h</span>
+          <span className={styles.hours}>{entry.hoursWorked.toFixed(1)} h</span>
 
           <div className={styles.actions}>
             <button

@@ -1,6 +1,8 @@
 export interface TimeEntry {
-  id:         string;
-  employeeId: string;
-  date:       string; // "YYYY-MM-DD"
-  hours:      number;
+  id:          string;
+  employeeId:  string;
+  date:        string; // ISO string from API, "YYYY-MM-DD" in mock
+  hoursWorked: number;
+  createdAt:   string;
+  updatedAt:   string;
 }

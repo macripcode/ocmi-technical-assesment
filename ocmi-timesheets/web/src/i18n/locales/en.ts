@@ -53,10 +53,13 @@ const en = {
     selectEmployee: 'Employee',
     addEntry:       '+ Log time',
     form: {
-      label: 'Log time',
-      date:  'Date',
-      hours: 'Hours',
-      save:  'Save',
+      titleAdd:  'Log Time',
+      titleEdit: 'Edit Entry',
+      label:     'Log time',
+      date:      'Date',
+      hours:     'Hours',
+      save:      'Save',
+      cancel:    'Cancel',
     },
     actions: {
       edit:   'Edit entry',

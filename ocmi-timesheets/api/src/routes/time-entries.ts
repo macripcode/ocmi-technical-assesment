@@ -21,7 +21,7 @@ timeEntriesRoutes.post('/', async (c) => {
     return c.json({ message: 'Invalid request', errors: result.error.issues }, 400);
   }
 
-  const { employeeId, date, hoursWorked, notes } = result.data;
+  const { employeeId, date, hoursWorked } = result.data;
   const weekStart = getWeekStart(new Date(date));
 
   const lockedTimesheet = await prisma.weeklyTimesheet.findUnique({
@@ -33,7 +33,7 @@ timeEntriesRoutes.post('/', async (c) => {
   }
 
   const entry = await prisma.timeEntry.create({
-    data: { employeeId, date: new Date(date), hoursWorked, notes },
+    data: { employeeId, date: new Date(date), hoursWorked },
   });
 
   return c.json(entry, 201);
@@ -78,7 +78,6 @@ timeEntriesRoutes.patch('/:id', async (c) => {
     data: {
       date: result.data.date !== undefined ? new Date(result.data.date) : undefined,
       hoursWorked: result.data.hoursWorked,
-      notes: result.data.notes,
     },
   });
 

@@ -5,8 +5,11 @@ import { CreateEmployeeSchema, UpdateEmployeeSchema } from '@ocmi-timesheets/sha
 export const employeesRoutes = new Hono();
 
 employeesRoutes.get('/', async (c) => {
+  const includeInactive = c.req.query('includeInactive') === 'true';
+
   const employees = await prisma.employee.findMany({
-    where: { deactivatedAt: null },
+    where: includeInactive ? undefined : { deactivatedAt: null },
+    orderBy: { createdAt: 'asc' },
   });
 
   return c.json(employees);

@@ -1,14 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Employee } from '../../types/employee';
 import { Button } from '../../components/Button';
 import { Checkbox } from '../../components/Checkbox';
 import { EmployeeForm } from '../../components/EmployeeForm';
 import { EmployeeTable } from '../../components/EmployeeTable';
-import { mockEmployees } from './mockData';
+import {
+  fetchEmployees,
+  createEmployee,
+  updateEmployee,
+  deactivateEmployee,
+} from '../../lib/employeeApi';
 import styles from './Employees.module.css';
 
-// ── Sort types ───────────────────────────────────────────────────────
+// ── Sort ─────────────────────────────────────────────────────────────
 type SortField = 'name' | 'lastName' | 'createdAt' | 'updatedAt';
 type SortDir   = 'asc' | 'desc';
 
@@ -35,64 +40,65 @@ interface FormState {
 export function EmployeesPage() {
   const { t } = useTranslation();
 
-  const [employees,    setEmployees]    = useState<Employee[]>(mockEmployees);
+  const [employees,    setEmployees]    = useState<Employee[]>([]);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState<string | null>(null);
   const [showInactive, setShowInactive] = useState(false);
   const [formState,    setFormState]    = useState<FormState>({ open: false });
   const [sortField,    setSortField]    = useState<SortField>('name');
   const [sortDir,      setSortDir]      = useState<SortDir>('asc');
 
-  const visible = showInactive
-    ? employees
-    : employees.filter((e) => e.status === 'ACTIVE');
+  // ── Load employees ────────────────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
 
-  const sorted = sortEmployees(visible, sortField, sortDir);
+    fetchEmployees(showInactive)
+      .then((data) => { if (!cancelled) setEmployees(data); })
+      .catch(() => { if (!cancelled) setError('Could not load employees.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
 
-  function handleSortFieldChange(field: SortField) {
-    setSortField(field);
-    setSortDir('asc'); // reset direction when field changes
-  }
+    return () => { cancelled = true; };
+  }, [showInactive]);
 
-  function openAdd() { setFormState({ open: true }); }
+  // ── Derived list ──────────────────────────────────────────────────
+  const sorted = sortEmployees(employees, sortField, sortDir);
+
+  // ── Handlers ──────────────────────────────────────────────────────
+  function openAdd()  { setFormState({ open: true }); }
   function openEdit(emp: Employee) { setFormState({ open: true, employee: emp }); }
   function closeForm() { setFormState({ open: false }); }
 
-  function handleFormSave(data: { name: string; lastName: string; hourlyRate: number }) {
-    if (formState.employee) {
-      setEmployees((prev) =>
-        prev.map((e) =>
-          e.id === formState.employee!.id
-            ? { ...e, ...data, updatedAt: new Date() }
-            : e
-        )
-      );
-    } else {
-      const now = new Date();
-      const next: Employee = {
-        id:         `emp-${Date.now()}`,
-        name:       data.name,
-        lastName:   data.lastName,
-        hourlyRate: data.hourlyRate,
-        status:     'ACTIVE',
-        createdAt:  now,
-        updatedAt:  now,
-      };
-      setEmployees((prev) => [...prev, next]);
+  async function handleFormSave(data: { name: string; lastName: string; hourlyRate: number }) {
+    try {
+      if (formState.employee) {
+        const updated = await updateEmployee(formState.employee.id, data);
+        setEmployees((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+      } else {
+        const created = await createEmployee(data);
+        setEmployees((prev) => [...prev, created]);
+      }
+      closeForm();
+    } catch {
+      alert('Error saving employee. Please try again.');
     }
-    closeForm();
   }
 
-  function handleDeactivate(emp: Employee) {
-    setEmployees((prev) =>
-      prev.map((e) => (e.id === emp.id ? { ...e, status: 'INACTIVE' } : e))
-    );
+  async function handleDeactivate(emp: Employee) {
+    try {
+      const deactivated = await deactivateEmployee(emp.id);
+      if (showInactive) {
+        setEmployees((prev) => prev.map((e) => (e.id === emp.id ? deactivated : e)));
+      } else {
+        setEmployees((prev) => prev.filter((e) => e.id !== emp.id));
+      }
+    } catch {
+      alert('Error deactivating employee. Please try again.');
+    }
   }
 
-  function handleReactivate(emp: Employee) {
-    setEmployees((prev) =>
-      prev.map((e) => (e.id === emp.id ? { ...e, status: 'ACTIVE' } : e))
-    );
-  }
-
+  // ── Render ────────────────────────────────────────────────────────
   return (
     <div className={styles.page}>
 
@@ -119,7 +125,7 @@ export function EmployeesPage() {
         <select
           className={styles.sortSelect}
           value={sortField}
-          onChange={(e) => handleSortFieldChange(e.target.value as SortField)}
+          onChange={(e) => { setSortField(e.target.value as SortField); setSortDir('asc'); }}
         >
           <option value="name">{t('employees.sort.name')}</option>
           <option value="lastName">{t('employees.sort.lastName')}</option>
@@ -146,13 +152,19 @@ export function EmployeesPage() {
         </select>
       </div>
 
+      {/* ── States ─────────────────────────────────────────────── */}
+      {loading && <p className={styles.feedback}>Loading…</p>}
+      {error   && <p className={styles.feedbackError}>{error}</p>}
+
       {/* ── Employee list ──────────────────────────────────────── */}
-      <EmployeeTable
-        employees={sorted}
-        onEdit={openEdit}
-        onDeactivate={handleDeactivate}
-        onReactivate={handleReactivate}
-      />
+      {!loading && !error && (
+        <EmployeeTable
+          employees={sorted}
+          onEdit={openEdit}
+          onDeactivate={handleDeactivate}
+          onReactivate={() => {}}
+        />
+      )}
 
       {formState.open && (
         <EmployeeForm

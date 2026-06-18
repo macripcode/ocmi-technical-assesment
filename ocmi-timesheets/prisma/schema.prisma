@@ -10,7 +10,7 @@ datasource db {
 model Employee {
   id         String         @id @default(uuid())
   name       String
-  role       String
+  lastName   String         @default("")
   hourlyRate Float
   status     EmployeeStatus @default(ACTIVE)
 

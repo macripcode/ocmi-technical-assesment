@@ -2,6 +2,21 @@
   animation: slideUp var(--transition-slow) ease both;
 }
 
+/* ─── Feedback (loading / error) ─────────────────────────────────── */
+.feedback {
+  color:     var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding:   var(--space-6) 0;
+  text-align: center;
+}
+
+.feedbackError {
+  color:     var(--color-danger);
+  font-size: var(--font-size-sm);
+  padding:   var(--space-6) 0;
+  text-align: center;
+}
+
 /* ─── Header ──────────────────────────────────────────────────────── */
 .header {
   display:        flex;

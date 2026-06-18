@@ -45,8 +45,23 @@ const en = {
     },
     empty: 'No time entries for this employee.',
   },
-  placeholders: {
-    weeklySummary: 'Weekly Summary — coming soon.',
+  weeklySummary: {
+    title:     'Weekly Summary',
+    weekOf:    'Week of',
+    regular:   'Regular',
+    overtime:  'Overtime',
+    pay:       'Pay',
+    locked:    'Locked',
+    noEntries: 'No time entries this week.',
+    actions: {
+      approve: 'Approve',
+      reject:  'Reject',
+    },
+    status: {
+      pending:  'Pending',
+      approved: 'Approved',
+      rejected: 'Rejected',
+    },
   },
 } as const;
 

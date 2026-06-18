@@ -47,8 +47,23 @@ const es: Translations = {
     },
     empty: 'No hay registros para este empleado.',
   },
-  placeholders: {
-    weeklySummary: 'Resumen Semanal — próximamente.',
+  weeklySummary: {
+    title:     'Resumen Semanal',
+    weekOf:    'Semana del',
+    regular:   'Regular',
+    overtime:  'Horas extra',
+    pay:       'Pago',
+    locked:    'Bloqueado',
+    noEntries: 'No hay registros esta semana.',
+    actions: {
+      approve: 'Aprobar',
+      reject:  'Rechazar',
+    },
+    status: {
+      pending:  'Pendiente',
+      approved: 'Aprobado',
+      rejected: 'Rechazado',
+    },
   },
 };
 

@@ -21,5 +21,7 @@ export const mockTimeEntries: TimeEntry[] = [
   { id: 'te13', employeeId: '4', date: '2026-06-16', hours: 8.0 },
   { id: 'te14', employeeId: '4', date: '2026-06-17', hours: 8.0 },
   { id: 'te15', employeeId: '4', date: '2026-06-18', hours: 4.0 },
+  // Ana García overtime — pushes her Jun 08-14 week to 45.5 h (5.5 h OT)
+  { id: 'te16', employeeId: '1', date: '2026-06-14', hours: 5.5 },
   // Sofía Hernández (id: '5') — inactive, intentionally no entries
 ];

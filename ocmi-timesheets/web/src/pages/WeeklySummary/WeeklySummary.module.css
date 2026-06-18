@@ -1,12 +1,78 @@
-.placeholder {
+.page {
+  animation: slideUp var(--transition-slow) ease both;
+}
+
+/* ─── Week navigation bar ─────────────────────────────────────────── */
+.weekNav {
+  display:         flex;
+  align-items:     center;
+  gap:             var(--space-3);
+  margin-bottom:   var(--space-6);
+  justify-content: center;
+}
+
+@media (min-width: 1024px) {
+  .weekNav { justify-content: flex-start; }
+}
+
+.weekOfLabel {
+  font-size:   var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color:       var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.navBtn {
+  display:          inline-flex;
+  align-items:      center;
+  justify-content:  center;
+  width:            2rem;
+  height:           2rem;
+  border:           1px solid var(--color-border);
+  border-radius:    var(--radius-full);
+  background-color: var(--color-surface);
+  color:            var(--color-text-muted);
+  font-size:        1.25rem;
+  cursor:           pointer;
+  flex-shrink:      0;
+  transition:
+    background-color var(--transition-fast),
+    color            var(--transition-fast),
+    border-color     var(--transition-fast);
+}
+
+.navBtn:hover {
+  background-color: var(--color-primary-subtle);
+  border-color:     var(--color-primary);
+  color:            var(--color-primary);
+}
+
+.weekRange {
+  font-size:    var(--font-size-base);
+  font-weight:  var(--font-weight-semibold);
+  color:        var(--color-text);
+  white-space:  nowrap;
+  min-width:    10rem;
+  text-align:   center;
+}
+
+/* ─── Card list ───────────────────────────────────────────────────── */
+.list {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-3);
+  animation:      slideUp var(--transition-slow) ease both;
+}
+
+/* ─── Empty state ─────────────────────────────────────────────────── */
+.empty {
   display:          flex;
   align-items:      center;
   justify-content:  center;
-  min-height:       16rem;
-  color:            var(--color-text-muted);
-  font-size:        var(--font-size-sm);
+  padding:          var(--space-12) var(--space-4);
   background-color: var(--color-surface);
   border:           1px solid var(--color-border);
   border-radius:    var(--radius-xl);
-  animation:        fadeIn var(--transition-slow) ease both;
+  color:            var(--color-text-muted);
+  font-size:        var(--font-size-sm);
 }

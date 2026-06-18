@@ -10,13 +10,8 @@ interface EmployeeTableProps {
   onReactivate: (employee: Employee) => void;
 }
 
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
+function initials(name: string, lastName: string): string {
+  return `${name[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
 }
 
 export function EmployeeTable({
@@ -42,9 +37,9 @@ export function EmployeeTable({
 
           {/* ── Left: avatar + name + rate ────────────────────────── */}
           <div className={styles.main}>
-            <div className={styles.avatar}>{initials(emp.name)}</div>
+            <div className={styles.avatar}>{initials(emp.name, emp.lastName)}</div>
             <div className={styles.info}>
-              <span className={styles.name}>{emp.name}</span>
+              <span className={styles.name}>{emp.name} {emp.lastName}</span>
               <span className={styles.rate}>${emp.hourlyRate.toFixed(2)}/hr</span>
             </div>
           </div>

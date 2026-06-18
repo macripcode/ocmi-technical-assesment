@@ -6,6 +6,7 @@ export type EmployeeStatus = 'ACTIVE' | 'INACTIVE';
 export interface Employee {
   id: string;
   name: string;
+  lastName: string;
   hourlyRate: number;
   status: EmployeeStatus;
   deactivatedAt: Date | null;

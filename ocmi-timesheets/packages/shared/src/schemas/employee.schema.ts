@@ -2,11 +2,13 @@ import { z } from 'zod';
 
 export const CreateEmployeeSchema = z.object({
   name:       z.string().min(1),
+  lastName:   z.string().min(1),
   hourlyRate: z.coerce.number().positive(),
   status:     z.enum(['ACTIVE', 'INACTIVE']).optional(),
 });
 
 export const UpdateEmployeeSchema = z.object({
   name:       z.string().min(1).optional(),
+  lastName:   z.string().min(1).optional(),
   hourlyRate: z.coerce.number().positive().optional(),
 });

@@ -60,7 +60,7 @@ export function TimeEntriesPage() {
               onChange={(e) => setSelectedEmployee(e.target.value)}
             >
               {mockEmployees.map((emp) => (
-                <option key={emp.id} value={emp.id}>{emp.name}</option>
+                <option key={emp.id} value={emp.id}>{emp.name} {emp.lastName}</option>
               ))}
             </select>
           </label>

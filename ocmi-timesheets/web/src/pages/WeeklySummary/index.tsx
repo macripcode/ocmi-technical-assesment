@@ -69,7 +69,7 @@ export function WeeklySummaryPage() {
 
       return {
         employeeId:    emp.id,
-        employeeName:  emp.name,
+        employeeName:  `${emp.name} ${emp.lastName}`,
         regularHours:  regular,
         overtimeHours: overtime,
         regularPay,

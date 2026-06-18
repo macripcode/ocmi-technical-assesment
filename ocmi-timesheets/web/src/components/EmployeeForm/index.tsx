@@ -9,7 +9,7 @@ import styles from './EmployeeForm.module.css';
 interface EmployeeFormProps {
   /** Pass an existing employee to switch to edit mode. Omit for create mode. */
   employee?: Employee;
-  onSave:  (data: { name: string; hourlyRate: number }) => void;
+  onSave:  (data: { name: string; lastName: string; hourlyRate: number }) => void;
   onClose: () => void;
 }
 
@@ -18,6 +18,7 @@ export function EmployeeForm({ employee, onSave, onClose }: EmployeeFormProps) {
   const isEdit = Boolean(employee);
 
   const [name,       setName]       = useState(employee?.name       ?? '');
+  const [lastName,   setLastName]   = useState(employee?.lastName   ?? '');
   const [hourlyRate, setHourlyRate] = useState(
     employee ? String(employee.hourlyRate) : ''
   );
@@ -41,8 +42,8 @@ export function EmployeeForm({ employee, onSave, onClose }: EmployeeFormProps) {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const rate = parseFloat(hourlyRate);
-    if (!name.trim() || isNaN(rate) || rate <= 0) return;
-    onSave({ name: name.trim(), hourlyRate: rate });
+    if (!name.trim() || !lastName.trim() || isNaN(rate) || rate <= 0) return;
+    onSave({ name: name.trim(), lastName: lastName.trim(), hourlyRate: rate });
   }
 
   return (
@@ -80,9 +81,24 @@ export function EmployeeForm({ employee, onSave, onClose }: EmployeeFormProps) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Ana García"
+              placeholder="e.g. Ana"
               required
               autoFocus
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="emp-lastname">
+              {t('employees.form.lastName')}
+            </label>
+            <input
+              id="emp-lastname"
+              className={styles.input}
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="e.g. García"
+              required
             />
           </div>
 

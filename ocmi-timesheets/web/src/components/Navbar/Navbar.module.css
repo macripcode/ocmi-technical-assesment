@@ -86,6 +86,16 @@
     gap:         var(--space-3);
     margin-left: auto;
   }
+
+  /* Nav-specific button tint — overrides the overlay-ctrl defaults */
+  .controls .controlBtn {
+    background: var(--color-nav-ctrl);
+    color:      var(--color-text);
+  }
+  .controls .controlBtn:hover {
+    background: var(--color-nav-ctrl-hover);
+    color:      var(--color-primary);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════

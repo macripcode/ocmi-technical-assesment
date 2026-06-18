@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next';
 import type { Tab } from '../../types/tab';
 import { useTheme } from '../../context/ThemeContext';
 import { CloseIcon } from '../Icons';
-import { LanguageSwitcher } from '../LanguageSwitcher';
-import { ThemeToggle } from '../ThemeToggle';
 import styles from './Navbar.module.css';
 
 interface NavbarProps {
@@ -60,8 +58,20 @@ export function Navbar({ activeTab, onTabChange }: NavbarProps) {
           </div>
 
           <div className={styles.controls}>
-            <ThemeToggle />
-            <LanguageSwitcher />
+            <button
+              className={styles.controlBtn}
+              onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'es' : 'en')}
+              aria-label="Switch language"
+            >
+              {langIcon}
+            </button>
+            <button
+              className={styles.controlBtn}
+              onClick={toggle}
+              aria-label={themeIcon === '🌙' ? t('common.theme.dark') : t('common.theme.light')}
+            >
+              {themeIcon}
+            </button>
           </div>
         </div>
       </nav>

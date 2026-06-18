@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Employee } from '../../types/employee';
-import { Button } from '../Button';
+import { EditIcon, DeactivateIcon, ReactivateIcon } from '../Icons';
 import styles from './EmployeeTable.module.css';
 
 interface EmployeeTableProps {
@@ -79,30 +79,33 @@ export function EmployeeTable({
 
               <td className={styles.td}>
                 <div className={styles.actions}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
+                    className={`${styles.iconBtn} ${styles.iconBtnEdit}`}
                     onClick={() => onEdit(emp)}
+                    title={t('employees.actions.edit')}
+                    aria-label={t('employees.actions.edit')}
                   >
-                    {t('employees.actions.edit')}
-                  </Button>
+                    <EditIcon />
+                  </button>
 
                   {emp.status === 'ACTIVE' ? (
-                    <Button
-                      variant="ghostDanger"
-                      size="sm"
+                    <button
+                      className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                       onClick={() => onDeactivate(emp)}
+                      title={t('employees.actions.deactivate')}
+                      aria-label={t('employees.actions.deactivate')}
                     >
-                      {t('employees.actions.deactivate')}
-                    </Button>
+                      <DeactivateIcon />
+                    </button>
                   ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                    <button
+                      className={`${styles.iconBtn} ${styles.iconBtnSuccess}`}
                       onClick={() => onReactivate(emp)}
+                      title={t('employees.actions.reactivate')}
+                      aria-label={t('employees.actions.reactivate')}
                     >
-                      {t('employees.actions.reactivate')}
-                    </Button>
+                      <ReactivateIcon />
+                    </button>
                   )}
                 </div>
               </td>

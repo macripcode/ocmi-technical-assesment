@@ -121,10 +121,50 @@
 
 /* ─── Actions ─────────────────────────────────────────────────────── */
 .actions {
-  display:     inline-flex;
-  align-items: center;
-  gap:         var(--space-1);
+  display:         inline-flex;
+  align-items:     center;
+  gap:             var(--space-2);
   justify-content: flex-end;
+}
+
+.iconBtn {
+  display:          inline-flex;
+  align-items:      center;
+  justify-content:  center;
+  width:            2rem;
+  height:           2rem;
+  border:           none;
+  border-radius:    var(--radius-md);
+  background-color: transparent;
+  cursor:           pointer;
+  font-size:        1.125rem;
+  transition:
+    background-color var(--transition-fast),
+    color            var(--transition-fast);
+}
+
+.iconBtnEdit {
+  color: var(--color-text-muted);
+}
+.iconBtnEdit:hover {
+  background-color: var(--color-primary-subtle);
+  color:            var(--color-primary);
+}
+
+.iconBtnDanger {
+  color: var(--color-text-muted);
+}
+.iconBtnDanger:hover {
+  background-color: var(--color-danger-subtle);
+  color:            var(--color-danger);
+}
+
+.iconBtnSuccess {
+  color: var(--color-text-muted);
+}
+.iconBtnSuccess:hover {
+  background-color: var(--color-success-subtle);
+  color:            var(--color-success);
 }
 
 /* ─── Empty state ─────────────────────────────────────────────────── */

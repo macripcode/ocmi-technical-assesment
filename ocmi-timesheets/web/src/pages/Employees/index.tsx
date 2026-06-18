@@ -30,6 +30,9 @@ function sortEmployees(list: Employee[], field: SortField, dir: SortDir): Employ
   });
 }
 
+// ── Constants ─────────────────────────────────────────────────────────
+const PAGE_SIZE = 10;
+
 // ── Form state ───────────────────────────────────────────────────────
 interface FormState {
   open:      boolean;
@@ -47,12 +50,14 @@ export function EmployeesPage() {
   const [formState,    setFormState]    = useState<FormState>({ open: false });
   const [sortField,    setSortField]    = useState<SortField>('name');
   const [sortDir,      setSortDir]      = useState<SortDir>('asc');
+  const [page,         setPage]         = useState(1);
 
   // ── Load employees ────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setPage(1);
 
     fetchEmployees(showInactive)
       .then((data) => { if (!cancelled) setEmployees(data); })
@@ -63,12 +68,21 @@ export function EmployeesPage() {
   }, [showInactive]);
 
   // ── Derived list ──────────────────────────────────────────────────
-  const sorted = sortEmployees(employees, sortField, sortDir);
+  const sorted     = sortEmployees(employees, sortField, sortDir);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const paginated  = sorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   // ── Handlers ──────────────────────────────────────────────────────
   function openAdd()  { setFormState({ open: true }); }
   function openEdit(emp: Employee) { setFormState({ open: true, employee: emp }); }
   function closeForm() { setFormState({ open: false }); }
+
+  function handleSortField(field: SortField) {
+    setSortField(field);
+    setSortDir('asc');
+    setPage(1);
+  }
 
   async function handleFormSave(data: { name: string; lastName: string; hourlyRate: number }) {
     try {
@@ -77,7 +91,12 @@ export function EmployeesPage() {
         setEmployees((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
       } else {
         const created = await createEmployee(data);
-        setEmployees((prev) => [...prev, created]);
+        setEmployees((prev) => {
+          const next = [...prev, created];
+          // Jump to the last page so the new employee is visible
+          setPage(Math.ceil(next.length / PAGE_SIZE));
+          return next;
+        });
       }
       closeForm();
     } catch {
@@ -88,11 +107,15 @@ export function EmployeesPage() {
   async function handleDeactivate(emp: Employee) {
     try {
       const deactivated = await deactivateEmployee(emp.id);
-      if (showInactive) {
-        setEmployees((prev) => prev.map((e) => (e.id === emp.id ? deactivated : e)));
-      } else {
-        setEmployees((prev) => prev.filter((e) => e.id !== emp.id));
-      }
+      setEmployees((prev) => {
+        const next = showInactive
+          ? prev.map((e) => (e.id === emp.id ? deactivated : e))
+          : prev.filter((e) => e.id !== emp.id);
+        // If current page becomes empty after removal, go back one page
+        const newTotal = Math.max(1, Math.ceil(next.length / PAGE_SIZE));
+        setPage((p) => Math.min(p, newTotal));
+        return next;
+      });
     } catch {
       alert('Error deactivating employee. Please try again.');
     }
@@ -125,7 +148,7 @@ export function EmployeesPage() {
         <select
           className={styles.sortSelect}
           value={sortField}
-          onChange={(e) => { setSortField(e.target.value as SortField); setSortDir('asc'); }}
+          onChange={(e) => handleSortField(e.target.value as SortField)}
         >
           <option value="name">{t('employees.sort.name')}</option>
           <option value="lastName">{t('employees.sort.lastName')}</option>
@@ -136,7 +159,7 @@ export function EmployeesPage() {
         <select
           className={styles.sortSelect}
           value={sortDir}
-          onChange={(e) => setSortDir(e.target.value as SortDir)}
+          onChange={(e) => { setSortDir(e.target.value as SortDir); setPage(1); }}
         >
           {isDateField(sortField) ? (
             <>
@@ -158,12 +181,48 @@ export function EmployeesPage() {
 
       {/* ── Employee list ──────────────────────────────────────── */}
       {!loading && !error && (
-        <EmployeeTable
-          employees={sorted}
-          onEdit={openEdit}
-          onDeactivate={handleDeactivate}
-          onReactivate={() => {}}
-        />
+        <>
+          <EmployeeTable
+            employees={paginated}
+            onEdit={openEdit}
+            onDeactivate={handleDeactivate}
+            onReactivate={() => {}}
+          />
+
+          {/* ── Pagination ───────────────────────────────────── */}
+          {totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button
+                className={styles.pageBtn}
+                onClick={() => setPage((p) => p - 1)}
+                disabled={safePage === 1}
+                aria-label="Previous page"
+              >
+                ‹
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  className={`${styles.pageBtn} ${n === safePage ? styles.pageBtnActive : ''}`}
+                  onClick={() => setPage(n)}
+                  aria-current={n === safePage ? 'page' : undefined}
+                >
+                  {n}
+                </button>
+              ))}
+
+              <button
+                className={styles.pageBtn}
+                onClick={() => setPage((p) => p + 1)}
+                disabled={safePage === totalPages}
+                aria-label="Next page"
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {formState.open && (

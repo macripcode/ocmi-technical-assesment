@@ -7,12 +7,14 @@ import { mockEmployees } from '../Employees/mockData';
 import { mockTimeEntries } from '../TimeEntries/mockData';
 import styles from './WeeklySummary.module.css';
 
-// ── Date helpers ────────────────────────────────────────────────────
+// ── Constants ────────────────────────────────────────────────────────
+const PAGE_SIZE = 10;
 
+// ── Date helpers ─────────────────────────────────────────────────────
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day; // anchor on Monday
+  const diff = day === 0 ? -6 : 1 - day;
   d.setDate(d.getDate() + diff);
   d.setHours(0, 0, 0, 0);
   return d;
@@ -33,27 +35,24 @@ function formatWeekRange(start: Date): string {
   return `${fmt(start)} – ${fmt(end)}`;
 }
 
-// ── Initial approval seeds (for demo) ──────────────────────────────
-// María López (id: '3') is pre-approved for the Jun 08 week
+// ── Initial approval seeds (for demo) ────────────────────────────────
 const INITIAL_APPROVALS: Record<string, WeeklyStatus> = {
   '3-2026-06-08': 'APPROVED',
 };
 
 // ── Page ─────────────────────────────────────────────────────────────
-
 export function WeeklySummaryPage() {
   const { t } = useTranslation();
 
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
-  const [approvals, setApprovals] =
-    useState<Record<string, WeeklyStatus>>(INITIAL_APPROVALS);
+  const [approvals, setApprovals] = useState<Record<string, WeeklyStatus>>(INITIAL_APPROVALS);
+  const [page, setPage]           = useState(1);
 
-  const weekEnd = new Date(weekStart);
+  const weekEnd   = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
-  const startISO = isoDate(weekStart);
-  const endISO   = isoDate(weekEnd);
+  const startISO  = isoDate(weekStart);
+  const endISO    = isoDate(weekEnd);
 
-  // Compute summary for each active employee who logged hours this week
   const summaries: WeeklySummaryEntry[] = mockEmployees
     .filter((emp) => emp.status === 'ACTIVE')
     .map((emp) => {
@@ -80,12 +79,17 @@ export function WeeklySummaryPage() {
     })
     .filter((s) => s.regularHours > 0 || s.overtimeHours > 0);
 
+  const totalPages = Math.max(1, Math.ceil(summaries.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const paginated  = summaries.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   function navigate(dir: -1 | 1) {
     setWeekStart((prev) => {
       const d = new Date(prev);
       d.setDate(d.getDate() + dir * 7);
       return d;
     });
+    setPage(1);
   }
 
   function handleApprove(employeeId: string) {
@@ -125,16 +129,52 @@ export function WeeklySummaryPage() {
           <p>{t('weeklySummary.noEntries')}</p>
         </div>
       ) : (
-        <div className={styles.list}>
-          {summaries.map((entry) => (
-            <WeeklySummaryCard
-              key={entry.employeeId}
-              entry={entry}
-              onApprove={() => handleApprove(entry.employeeId)}
-              onReject={() => handleReject(entry.employeeId)}
-            />
-          ))}
-        </div>
+        <>
+          <div className={styles.list}>
+            {paginated.map((entry) => (
+              <WeeklySummaryCard
+                key={entry.employeeId}
+                entry={entry}
+                onApprove={() => handleApprove(entry.employeeId)}
+                onReject={() => handleReject(entry.employeeId)}
+              />
+            ))}
+          </div>
+
+          {/* ── Pagination ─────────────────────────────────────── */}
+          {totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button
+                className={styles.pageBtn}
+                onClick={() => setPage((p) => p - 1)}
+                disabled={safePage === 1}
+                aria-label="Previous page"
+              >
+                ‹
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  className={`${styles.pageBtn} ${n === safePage ? styles.pageBtnActive : ''}`}
+                  onClick={() => setPage(n)}
+                  aria-current={n === safePage ? 'page' : undefined}
+                >
+                  {n}
+                </button>
+              ))}
+
+              <button
+                className={styles.pageBtn}
+                onClick={() => setPage((p) => p + 1)}
+                disabled={safePage === totalPages}
+                aria-label="Next page"
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </>
       )}
 
     </div>

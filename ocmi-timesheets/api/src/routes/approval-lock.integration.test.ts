@@ -26,7 +26,7 @@ describe('approval lock flow', () => {
       new Request('http://localhost/employees', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Lock Test', role: 'Developer', hourlyRate: 20 }),
+        body: JSON.stringify({ name: 'Lock Test', hourlyRate: 20 }),
       })
     );
     expect(empRes.status).toBe(201);

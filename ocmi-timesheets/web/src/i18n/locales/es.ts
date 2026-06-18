@@ -15,7 +15,6 @@ const es: Translations = {
     showInactive: 'Mostrar Inactivos',
     table: {
       name:       'Nombre',
-      role:       'Rol',
       hourlyRate: 'Tarifa por Hora',
       status:     'Estado',
       actions:    'Acciones',
@@ -30,6 +29,14 @@ const es: Translations = {
       reactivate: 'Reactivar',
     },
     empty: 'No se encontraron empleados.',
+    form: {
+      titleAdd:   'Agregar Empleado',
+      titleEdit:  'Editar Empleado',
+      name:       'Nombre completo',
+      hourlyRate: 'Tarifa por hora ($/hr)',
+      save:       'Guardar',
+      cancel:     'Cancelar',
+    },
   },
   timeEntries: {
     title:          'Registros de Tiempo',

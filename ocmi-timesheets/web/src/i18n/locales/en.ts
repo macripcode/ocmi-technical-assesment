@@ -13,7 +13,6 @@ const en = {
     showInactive: 'Show Inactive',
     table: {
       name:       'Name',
-      role:       'Role',
       hourlyRate: 'Hourly Rate',
       status:     'Status',
       actions:    'Actions',
@@ -28,6 +27,14 @@ const en = {
       reactivate: 'Reactivate',
     },
     empty: 'No employees found.',
+    form: {
+      titleAdd:   'Add Employee',
+      titleEdit:  'Edit Employee',
+      name:       'Full name',
+      hourlyRate: 'Hourly rate ($/hr)',
+      save:       'Save',
+      cancel:     'Cancel',
+    },
   },
   timeEntries: {
     title:          'Time Entries',

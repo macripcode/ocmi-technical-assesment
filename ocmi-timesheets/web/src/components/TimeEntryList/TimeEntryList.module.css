@@ -1,0 +1,106 @@
+/* ─── Card list ───────────────────────────────────────────────────── */
+.list {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-2);
+  animation:      slideUp var(--transition-slow) ease both;
+}
+
+/* ─── Individual card ─────────────────────────────────────────────── */
+.card {
+  background-color: var(--color-surface);
+  border:           1px solid var(--color-border);
+  border-radius:    var(--radius-lg);
+  padding:          var(--space-3) var(--space-4);
+
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-2);
+
+  transition: box-shadow var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+@media (min-width: 1024px) {
+  .card {
+    flex-direction: row;
+    align-items:    center;
+    gap:            var(--space-4);
+  }
+}
+
+/* ─── Date ────────────────────────────────────────────────────────── */
+.date {
+  flex:        1;
+  font-size:   var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color:       var(--color-text);
+  white-space: nowrap;
+}
+
+/* ─── Hours ───────────────────────────────────────────────────────── */
+.hours {
+  font-size:    var(--font-size-base);
+  font-weight:  var(--font-weight-semibold);
+  color:        var(--color-primary);
+  font-variant-numeric: tabular-nums;
+  min-width:    4.5rem;
+  text-align:   right;
+  flex-shrink:  0;
+}
+
+@media (min-width: 1024px) {
+  .hours { text-align: right; }
+}
+
+/* ─── Action buttons ──────────────────────────────────────────────── */
+.actions {
+  display:     inline-flex;
+  align-items: center;
+  gap:         var(--space-1);
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  display:          inline-flex;
+  align-items:      center;
+  justify-content:  center;
+  width:            2rem;
+  height:           2rem;
+  border:           none;
+  border-radius:    var(--radius-md);
+  background-color: transparent;
+  cursor:           pointer;
+  font-size:        1.125rem;
+  transition:
+    background-color var(--transition-fast),
+    color            var(--transition-fast);
+}
+
+.iconBtnEdit { color: var(--color-text-muted); }
+.iconBtnEdit:hover {
+  background-color: var(--color-primary-subtle);
+  color:            var(--color-primary);
+}
+
+.iconBtnDanger { color: var(--color-text-muted); }
+.iconBtnDanger:hover {
+  background-color: var(--color-danger-subtle);
+  color:            var(--color-danger);
+}
+
+/* ─── Empty state ─────────────────────────────────────────────────── */
+.empty {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  padding:          var(--space-12) var(--space-4);
+  background-color: var(--color-surface);
+  border:           1px solid var(--color-border);
+  border-radius:    var(--radius-xl);
+  color:            var(--color-text-muted);
+  font-size:        var(--font-size-sm);
+}

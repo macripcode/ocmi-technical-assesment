@@ -31,8 +31,23 @@ const es: Translations = {
     },
     empty: 'No se encontraron empleados.',
   },
+  timeEntries: {
+    title:          'Registros de Tiempo',
+    selectEmployee: 'Empleado',
+    addEntry:       '+ Registrar tiempo',
+    form: {
+      label: 'Registrar tiempo',
+      date:  'Fecha',
+      hours: 'Horas',
+      save:  'Guardar',
+    },
+    actions: {
+      edit:   'Editar registro',
+      delete: 'Eliminar registro',
+    },
+    empty: 'No hay registros para este empleado.',
+  },
   placeholders: {
-    timeEntries:   'Registros de Tiempo — próximamente.',
     weeklySummary: 'Resumen Semanal — próximamente.',
   },
 };

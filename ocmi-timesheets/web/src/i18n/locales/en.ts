@@ -29,11 +29,33 @@ const en = {
     },
     empty: 'No employees found.',
   },
+  timeEntries: {
+    title:          'Time Entries',
+    selectEmployee: 'Employee',
+    addEntry:       '+ Log time',
+    form: {
+      label: 'Log time',
+      date:  'Date',
+      hours: 'Hours',
+      save:  'Save',
+    },
+    actions: {
+      edit:   'Edit entry',
+      delete: 'Delete entry',
+    },
+    empty: 'No time entries for this employee.',
+  },
   placeholders: {
-    timeEntries:   'Time Entries — coming soon.',
     weeklySummary: 'Weekly Summary — coming soon.',
   },
 } as const;
 
 export default en;
-export type Translations = typeof en;
+
+// Recursively replaces all leaf types with string so Spanish translations
+// are not forced to match the exact English literal values.
+type DeepString<T> = T extends object
+  ? { [K in keyof T]: DeepString<T[K]> }
+  : string;
+
+export type Translations = DeepString<typeof en>;

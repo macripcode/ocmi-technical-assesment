@@ -1,12 +1,179 @@
-.placeholder {
-  display:          flex;
-  align-items:      center;
-  justify-content:  center;
-  min-height:       16rem;
-  color:            var(--color-text-muted);
+.page {
+  animation: slideUp var(--transition-slow) ease both;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────── */
+.header {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-3);
+  margin-bottom:  var(--space-6);
+}
+
+@media (min-width: 1024px) {
+  .header {
+    flex-direction: row;
+    align-items:    center;
+    gap:            var(--space-4);
+  }
+}
+
+/* ─── Title ───────────────────────────────────────────────────────── */
+.title {
+  font-size:   var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color:       var(--color-text);
+  text-align:  center;
+}
+
+@media (min-width: 1024px) {
+  .title {
+    text-align: left;
+    flex:       1 1 auto;
+    min-width:  0;
+  }
+}
+
+/* ─── Controls (employee select + add button) ─────────────────────── */
+.controls {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     flex-end;
+  gap:             var(--space-2);
+}
+
+@media (min-width: 1024px) {
+  .controls {
+    flex-direction: row;
+    align-items:    center;
+    gap:            var(--space-3);
+    flex-shrink:    0;
+  }
+}
+
+/* ─── Employee select ─────────────────────────────────────────────── */
+.selectWrapper {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2);
+}
+
+.selectLabel {
+  font-size:   var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color:       var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.select {
+  appearance:       none;
+  background-color: var(--color-surface);
+  border:           1px solid var(--color-border);
+  border-radius:    var(--radius-md);
+  padding:          var(--space-2) var(--space-8) var(--space-2) var(--space-3);
   font-size:        var(--font-size-sm);
+  font-weight:      var(--font-weight-medium);
+  color:            var(--color-text);
+  cursor:           pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat:   no-repeat;
+  background-position: right var(--space-3) center;
+  transition:
+    border-color     var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.select:hover  { border-color: var(--color-primary); }
+.select:focus  {
+  outline:      none;
+  border-color: var(--color-primary);
+  box-shadow:   0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* ─── Log time section ────────────────────────────────────────────── */
+.logSection {
+  margin-top:       var(--space-6);
   background-color: var(--color-surface);
   border:           1px solid var(--color-border);
   border-radius:    var(--radius-xl);
-  animation:        fadeIn var(--transition-slow) ease both;
+  padding:          var(--space-5) var(--space-6);
+}
+
+.logForm {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-4);
+}
+
+@media (min-width: 1024px) {
+  .logForm {
+    flex-direction: row;
+    align-items:    flex-end;
+    gap:            var(--space-5);
+  }
+}
+
+.logLabel {
+  font-size:   var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color:       var(--color-text-muted);
+  white-space: nowrap;
+  padding-bottom: var(--space-1);
+}
+
+@media (min-width: 1024px) {
+  .logLabel { padding-bottom: calc(var(--space-2) + 2px); }
+}
+
+/* ─── Form fields row ─────────────────────────────────────────────── */
+.logFields {
+  display: flex;
+  gap:     var(--space-4);
+  flex:    1;
+}
+
+/* ─── Individual field ────────────────────────────────────────────── */
+.field {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-1);
+  flex:           1;
+}
+
+.fieldLabel {
+  font-size:   var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color:       var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.input {
+  background-color: var(--color-surface-alt);
+  border:           1px solid var(--color-border);
+  border-radius:    var(--radius-md);
+  padding:          var(--space-2) var(--space-3);
+  font-size:        var(--font-size-sm);
+  color:            var(--color-text);
+  width:            100%;
+  transition:
+    border-color     var(--transition-fast),
+    background-color var(--transition-fast);
+  /* date + number inputs inherit font */
+  font-family:      inherit;
+}
+
+.input:hover { border-color: var(--color-primary); }
+.input:focus {
+  outline:      none;
+  border-color: var(--color-primary);
+  box-shadow:   0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* date picker icon tint in dark mode */
+.input[type='date']::-webkit-calendar-picker-indicator {
+  filter: var(--input-icon-filter, none);
+}
+
+[data-theme='dark'] .input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.8);
 }

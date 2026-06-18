@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════════════
+   DESKTOP  ≥ 1024 px
+   ═══════════════════════════════════════════════════════════════════ */
+.desktopNav {
+  display: none; /* mobile-first: hidden by default */
+}
+
+@media (min-width: 1024px) {
+  .desktopNav {
+    display:          block;
+    background-color: var(--color-nav-bg);
+    border-bottom:    1px solid var(--color-nav-border);
+    box-shadow:       var(--shadow-sm);
+    position:         sticky;
+    top:              0;
+    z-index:          var(--z-dropdown);
+    transition:       background-color var(--transition-slow);
+  }
+
+  .navInner {
+    display:      flex;
+    align-items:  stretch;
+    max-width:    72rem;
+    margin:       0 auto;
+    padding:      0 var(--space-6);
+    height:       3.5rem;
+    gap:          var(--space-2);
+  }
+
+  .brand {
+    display:        flex;
+    align-items:    center;
+    font-size:      var(--font-size-base);
+    font-weight:    var(--font-weight-bold);
+    color:          var(--color-text);
+    margin-right:   var(--space-4);
+    letter-spacing: -0.01em;
+    white-space:    nowrap;
+  }
+
+  .tabs {
+    display:     flex;
+    align-items: stretch;
+    flex:        1;
+  }
+
+  .tab {
+    position:         relative;
+    display:          inline-flex;
+    align-items:      center;
+    padding:          0 var(--space-4);
+    height:           100%;
+    font-size:        var(--font-size-sm);
+    font-weight:      var(--font-weight-medium);
+    color:            var(--color-text-muted);
+    background-color: transparent;
+    border:           none;
+    cursor:           pointer;
+    white-space:      nowrap;
+    transition:       color var(--transition-fast);
+  }
+
+  .tab::after {
+    content:          '';
+    position:         absolute;
+    bottom:           0;
+    left:             var(--space-4);
+    right:            var(--space-4);
+    height:           2px;
+    border-radius:    var(--radius-full) var(--radius-full) 0 0;
+    background-color: transparent;
+    transition:       background-color var(--transition-fast);
+  }
+
+  .tab:hover { color: var(--color-text); }
+
+  .tabActive {
+    color:       var(--color-tab-active);
+    font-weight: var(--font-weight-semibold);
+  }
+  .tabActive::after { background-color: var(--color-tab-active); }
+
+  .controls {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-3);
+    margin-left: auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE  < 1024 px
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Collapsed bar ─────────────────────────────────────────────── */
+.mobileBar {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  height:           3.5rem;
+  background-color: var(--color-nav-bg);
+  border-bottom:    1px solid var(--color-nav-border);
+  box-shadow:       var(--shadow-sm);
+  position:         sticky;
+  top:              0;
+  z-index:          var(--z-dropdown);
+  transition:       background-color var(--transition-slow);
+}
+
+.mobileTitle {
+  font-size:      var(--font-size-base);
+  font-weight:    var(--font-weight-bold);
+  letter-spacing: -0.01em;
+  color:          var(--color-text);
+  background:     none;
+  border:         none;
+  cursor:         pointer;
+  padding:        var(--space-2) var(--space-4);
+  border-radius:  var(--radius-md);
+  transition:     opacity var(--transition-fast);
+}
+.mobileTitle:hover { opacity: 0.7; }
+
+@media (min-width: 1024px) {
+  .mobileBar { display: none; }
+}
+
+/* ─── Full-screen overlay ───────────────────────────────────────── */
+.overlay {
+  position:        fixed;
+  inset:           0;
+  z-index:         var(--z-modal);
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         12vh var(--space-8) 10vh;
+  background:      linear-gradient(
+    160deg,
+    var(--color-overlay-from) 0%,
+    var(--color-overlay-via)  50%,
+    var(--color-overlay-to)   100%
+  );
+  animation:       fadeIn var(--transition-slow) ease both;
+  overflow:        hidden;
+}
+
+
+/* ─── Close button ──────────────────────────────────────────────── */
+.closeBtn {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  width:            3rem;
+  height:           3rem;
+  border-radius:    var(--radius-full);
+  border:           none;
+  background:       var(--color-overlay-ctrl);
+  color:            var(--color-overlay-text);
+  font-size:        1.4rem;
+  cursor:           pointer;
+  flex-shrink:      0;
+  transition:
+    background var(--transition-fast),
+    transform   var(--transition-fast);
+}
+.closeBtn:hover {
+  background: var(--color-overlay-ctrl-hover);
+  transform:  scale(1.05);
+}
+
+/* ─── Navigation links ──────────────────────────────────────────── */
+.menuLinks {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            var(--space-8);
+}
+
+.menuLink {
+  background:     none;
+  border:         none;
+  font-size:      var(--font-size-xl);
+  font-weight:    var(--font-weight-normal);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-variant:   small-caps;
+  color:          var(--color-overlay-text);
+  cursor:         pointer;
+  opacity:        0.75;
+  transition:     opacity var(--transition-fast);
+  padding:        var(--space-1) var(--space-2);
+}
+.menuLink:hover    { opacity: 1; }
+.menuLinkActive {
+  opacity:     1;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ─── Settings (language + theme) ──────────────────────────────── */
+.settings {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            var(--space-4);
+}
+
+.controlBtn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           3rem;
+  height:          3rem;
+  border-radius:   var(--radius-full);
+  border:          none;
+  background:      var(--color-overlay-ctrl);
+  font-size:       1.5rem;
+  cursor:          pointer;
+  line-height:     1;
+  transition:
+    background  var(--transition-fast),
+    transform   var(--transition-fast);
+}
+.controlBtn:hover {
+  background: var(--color-overlay-ctrl-hover);
+  transform:  scale(1.05);
+}

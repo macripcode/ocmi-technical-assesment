@@ -109,6 +109,43 @@
   color: #fff;
 }
 
+/* ─── Toast ───────────────────────────────────────────────────────── */
+.toast {
+  display:          flex;
+  align-items:      center;
+  justify-content:  space-between;
+  gap:              var(--space-3);
+  padding:          var(--space-3) var(--space-4);
+  margin-bottom:    var(--space-4);
+  border-radius:    var(--radius-lg);
+  background-color: var(--color-danger-subtle, #fef2f2);
+  color:            var(--color-danger);
+  border:           1px solid var(--color-danger);
+  font-size:        var(--font-size-sm);
+  font-weight:      var(--font-weight-medium);
+  animation:        slideUp var(--transition-slow) ease both;
+}
+
+.toastClose {
+  background:  none;
+  border:      none;
+  cursor:      pointer;
+  color:       inherit;
+  font-size:   1.1rem;
+  line-height: 1;
+  opacity:     0.7;
+  flex-shrink: 0;
+}
+.toastClose:hover { opacity: 1; }
+
+/* ─── Feedback (loading) ──────────────────────────────────────────── */
+.feedback {
+  color:      var(--color-text-muted);
+  font-size:  var(--font-size-sm);
+  padding:    var(--space-6) 0;
+  text-align: center;
+}
+
 /* ─── Empty state ─────────────────────────────────────────────────── */
 .empty {
   display:          flex;

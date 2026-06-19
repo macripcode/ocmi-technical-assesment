@@ -52,7 +52,8 @@ const es: Translations = {
   },
   timeEntries: {
     title:          'Registros de Tiempo',
-    selectEmployee: 'Empleado',
+    subtitle:       'Selecciona un empleado para ver y registrar sus horas.',
+    selectEmployee: 'Empleado Seleccionado',
     addEntry:       '+ Registrar tiempo',
     form: {
       titleAdd:  'Registrar Tiempo',

@@ -50,7 +50,8 @@ const en = {
   },
   timeEntries: {
     title:          'Time Entries',
-    selectEmployee: 'Employee',
+    subtitle:       'Select an employee to view and log time entries.',
+    selectEmployee: 'Selected Employee',
     addEntry:       '+ Log time',
     form: {
       titleAdd:  'Log Time',

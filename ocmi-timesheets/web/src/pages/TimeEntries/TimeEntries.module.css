@@ -4,95 +4,54 @@
 
 /* ─── Header ──────────────────────────────────────────────────────── */
 .header {
-  display:        flex;
-  flex-direction: column;
-  gap:            var(--space-3);
-  margin-bottom:  var(--space-6);
+  margin-bottom: var(--space-2);
 }
 
-@media (min-width: 1024px) {
-  .header {
-    flex-direction: row;
-    align-items:    center;
-    gap:            var(--space-4);
-  }
-}
-
-/* ─── Title ───────────────────────────────────────────────────────── */
 .title {
   font-size:   var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color:       var(--color-text);
-  text-align:  center;
+}
+
+.subtitle {
+  font-size:  var(--font-size-sm);
+  color:      var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+/* ─── Selector row (card selector + log time button) ─────────────── */
+.selectorRow {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-3);
+  margin-bottom:  var(--space-6);
+  margin-top:     var(--space-4);
 }
 
 @media (min-width: 1024px) {
-  .title {
-    text-align: left;
-    flex:       1 1 auto;
-    min-width:  0;
-  }
-}
-
-/* ─── Controls (employee select + add button) ─────────────────────── */
-.controls {
-  display:         flex;
-  flex-direction:  column;
-  align-items:     flex-end;
-  gap:             var(--space-2);
-}
-
-@media (min-width: 1024px) {
-  .controls {
+  .selectorRow {
     flex-direction: row;
-    align-items:    center;
-    gap:            var(--space-3);
-    flex-shrink:    0;
+    align-items:    flex-end;
+    gap:            var(--space-4);
   }
 }
 
-/* ─── Employee select ─────────────────────────────────────────────── */
-.selectWrapper {
-  display:     flex;
-  align-items: center;
-  gap:         var(--space-2);
+.selectorBlock {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-2);
+  flex:           1;
+  min-width:      0;
 }
 
-.selectLabel {
+.selectorLabel {
   font-size:   var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color:       var(--color-text-muted);
-  white-space: nowrap;
 }
 
-.select {
-  appearance:       none;
-  background-color: var(--color-surface);
-  border:           1px solid var(--color-border);
-  border-radius:    var(--radius-md);
-  padding:          var(--space-2) var(--space-8) var(--space-2) var(--space-3);
-  font-size:        var(--font-size-base);
-  font-weight:      var(--font-weight-medium);
-  color:            var(--color-text);
-  cursor:           pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat:   no-repeat;
-  background-position: right var(--space-3) center;
-  transition:
-    border-color     var(--transition-fast),
-    background-color var(--transition-fast);
-}
-
-.select option {
-  font-size:   var(--font-size-base);
-  font-weight: normal;
-}
-
-.select:hover  { border-color: var(--color-primary); }
-.select:focus  {
-  outline:      none;
-  border-color: var(--color-primary);
-  box-shadow:   0 0 0 3px rgba(59, 130, 246, 0.15);
+.logBtn {
+  flex-shrink: 0;
 }
 
 /* ─── Pagination ──────────────────────────────────────────────────── */

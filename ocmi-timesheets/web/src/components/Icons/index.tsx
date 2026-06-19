@@ -19,3 +19,6 @@ export { MdChevronRight     as NextIcon        } from 'react-icons/md';
 
 // ── UI ──────────────────────────────────────────────────────────────
 export { MdClose            as CloseIcon       } from 'react-icons/md';
+export { MdSearch           as SearchIcon      } from 'react-icons/md';
+export { MdExpandMore       as ChevronDownIcon } from 'react-icons/md';
+export { MdKeyboard         as KeyboardIcon    } from 'react-icons/md';

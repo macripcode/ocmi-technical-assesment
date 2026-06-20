@@ -125,6 +125,13 @@
   padding-left: calc(var(--space-4) + 1ch);
 }
 
+/* ─── Validation error ────────────────────────────────────────────── */
+.error {
+  font-size:  var(--font-size-sm);
+  color:      var(--color-danger, #dc2626);
+  margin-top: calc(var(--space-2) * -1);
+}
+
 /* ─── Footer buttons ──────────────────────────────────────────────── */
 .footer {
   display:         flex;

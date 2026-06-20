@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CreateEmployeeSchema } from '@ocmi-timesheets/shared';
 import type { Employee } from '../../types/employee';
 import { Button } from '../Button';
 import { CloseIcon } from '../Icons';
@@ -22,6 +23,7 @@ export function EmployeeForm({ employee, onSave, onClose }: EmployeeFormProps) {
   const [hourlyRate, setHourlyRate] = useState(
     employee ? String(employee.hourlyRate) : ''
   );
+  const [error, setError] = useState<string | null>(null);
 
   // Scroll lock + Escape key
   useEffect(() => {
@@ -41,9 +43,17 @@ export function EmployeeForm({ employee, onSave, onClose }: EmployeeFormProps) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const rate = parseFloat(hourlyRate);
-    if (!name.trim() || !lastName.trim() || isNaN(rate) || rate <= 0) return;
-    onSave({ name: name.trim(), lastName: lastName.trim(), hourlyRate: rate });
+    const result = CreateEmployeeSchema.safeParse({
+      name:       name.trim(),
+      lastName:   lastName.trim(),
+      hourlyRate: Number(hourlyRate),
+    });
+    if (!result.success) {
+      setError(result.error.issues[0].message);
+      return;
+    }
+    setError(null);
+    onSave(result.data);
   }
 
   return (
@@ -121,6 +131,8 @@ export function EmployeeForm({ employee, onSave, onClose }: EmployeeFormProps) {
               />
             </div>
           </div>
+
+          {error && <p className={styles.error}>{error}</p>}
 
           {/* Footer */}
           <div className={styles.footer}>

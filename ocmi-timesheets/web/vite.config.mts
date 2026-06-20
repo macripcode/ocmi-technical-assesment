@@ -20,6 +20,9 @@ export default defineConfig(() => ({
     port: 4200,
     host: 'localhost',
   },
+  resolve: {
+    conditions: ['@ocmi-timesheets/source'],
+  },
   plugins: [react()],
   // Uncomment this if you are using workers.
   // worker: {

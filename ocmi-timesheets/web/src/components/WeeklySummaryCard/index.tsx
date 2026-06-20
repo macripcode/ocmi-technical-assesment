@@ -14,27 +14,17 @@ function fmt(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-const STATUS_ICON: Record<WeeklyStatus, React.ReactElement> = {
-  PENDING:  <PendingIcon  />,
-  APPROVED: <ApprovedIcon />,
-  REJECTED: <RejectedIcon />,
-};
-
-const STATUS_CLASS: Record<WeeklyStatus, string> = {
-  PENDING:  styles.badgePending,
-  APPROVED: styles.badgeApproved,
-  REJECTED: styles.badgeRejected,
+const STATUS_CONFIG: Record<WeeklyStatus, { icon: React.ReactElement; cls: string }> = {
+  PENDING:  { icon: <PendingIcon  />, cls: styles.badgePending  },
+  APPROVED: { icon: <ApprovedIcon />, cls: styles.badgeApproved },
+  REJECTED: { icon: <RejectedIcon />, cls: styles.badgeRejected },
 };
 
 export function WeeklySummaryCard({ entry, onApprove, onReject }: WeeklySummaryCardProps) {
   const { t } = useTranslation();
-  const isPending = entry.status === 'PENDING';
-
-  const statusLabels: Record<WeeklyStatus, string> = {
-    PENDING:  t('weeklySummary.status.pending'),
-    APPROVED: t('weeklySummary.status.approved'),
-    REJECTED: t('weeklySummary.status.rejected'),
-  };
+  const isPending       = entry.status === 'PENDING';
+  const { icon, cls }   = STATUS_CONFIG[entry.status];
+  const statusLabel     = t(`weeklySummary.status.${entry.status.toLowerCase()}`);
 
   return (
     <div className={styles.card}>
@@ -42,9 +32,9 @@ export function WeeklySummaryCard({ entry, onApprove, onReject }: WeeklySummaryC
       {/* ── Row 1: name + status badge ──────────────────────────── */}
       <div className={styles.cardHeader}>
         <span className={styles.name}>{entry.employeeName}</span>
-        <span className={`${styles.badge} ${STATUS_CLASS[entry.status]}`}>
-          {STATUS_ICON[entry.status]}
-          {statusLabels[entry.status]}
+        <span className={`${styles.badge} ${cls}`}>
+          {icon}
+          {statusLabel}
         </span>
       </div>
 

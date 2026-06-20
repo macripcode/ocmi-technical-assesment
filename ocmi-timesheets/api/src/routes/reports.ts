@@ -50,11 +50,8 @@ reportsRoutes.get('/weekly', async (c) => {
 
   const summary = Array.from(summaryMap.values()).map(
     ({ employeeId, employeeName, hourlyRate, totalHours }) => {
-      const { regularHours, overtimeHours, totalPay } =
+      const { regularHours, overtimeHours, regularPay, overtimePay, totalPay } =
         calculateWeeklySummary(totalHours, hourlyRate);
-
-      const regularPay  = regularHours  * hourlyRate;
-      const overtimePay = overtimeHours * hourlyRate * 1.5;
 
       return {
         employeeId,

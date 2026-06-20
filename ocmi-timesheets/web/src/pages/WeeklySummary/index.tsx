@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getWeekStart } from '@ocmi-timesheets/shared';
 import type { WeeklySummaryEntry, WeeklyStatus } from '../../types/weeklySummary';
 import { WeeklySummaryCard } from '../../components/WeeklySummaryCard';
 import { PrevIcon, NextIcon } from '../../components/Icons';
@@ -7,16 +8,6 @@ import { fetchWeeklySummary, approveWeek, rejectWeek } from '../../lib/weeklyApi
 import styles from './WeeklySummary.module.css';
 
 const PAGE_SIZE = 10;
-
-// ── Date helpers (UTC to match the API's getWeekStart) ────────────────
-function getWeekStart(date: Date): Date {
-  const d   = new Date(date);
-  const day  = d.getUTCDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setUTCDate(d.getUTCDate() + diff);
-  d.setUTCHours(0, 0, 0, 0);
-  return d;
-}
 
 function isoDate(d: Date): string {
   return d.toISOString().split('T')[0]; // YYYY-MM-DD in UTC
@@ -84,25 +75,16 @@ export function WeeklySummaryPage() {
     );
   }
 
-  async function handleApprove(employeeId: string) {
+  async function handleStatusChange(employeeId: string, newStatus: WeeklyStatus) {
     const previous = summaries.find((s) => s.employeeId === employeeId)?.status ?? 'PENDING';
-    setStatus(employeeId, 'APPROVED');
+    setStatus(employeeId, newStatus);
     try {
-      await approveWeek(employeeId, startISO);
+      newStatus === 'APPROVED'
+        ? await approveWeek(employeeId, startISO)
+        : await rejectWeek(employeeId, startISO);
     } catch {
       setStatus(employeeId, previous);
-      setToast('No se pudo aprobar la semana.');
-    }
-  }
-
-  async function handleReject(employeeId: string) {
-    const previous = summaries.find((s) => s.employeeId === employeeId)?.status ?? 'PENDING';
-    setStatus(employeeId, 'REJECTED');
-    try {
-      await rejectWeek(employeeId, startISO);
-    } catch {
-      setStatus(employeeId, previous);
-      setToast('No se pudo rechazar la semana.');
+      setToast(newStatus === 'APPROVED' ? 'No se pudo aprobar la semana.' : 'No se pudo rechazar la semana.');
     }
   }
 
@@ -144,8 +126,8 @@ export function WeeklySummaryPage() {
               <WeeklySummaryCard
                 key={entry.employeeId}
                 entry={entry}
-                onApprove={() => handleApprove(entry.employeeId)}
-                onReject={() => handleReject(entry.employeeId)}
+                onApprove={() => handleStatusChange(entry.employeeId, 'APPROVED')}
+                onReject={() => handleStatusChange(entry.employeeId, 'REJECTED')}
               />
             ))}
           </div>

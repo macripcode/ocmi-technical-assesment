@@ -8,8 +8,10 @@ export function getWeekStart(date: Date): Date {
 }
 
 export function calculateWeeklySummary(totalHours: number, hourlyRate: number) {
-  const regularHours = Math.min(totalHours, 40);
+  const regularHours  = Math.min(totalHours, 40);
   const overtimeHours = Math.max(0, totalHours - 40);
-  const totalPay = regularHours * hourlyRate + overtimeHours * hourlyRate * 1.5;
-  return { regularHours, overtimeHours, totalPay };
+  const regularPay    = regularHours  * hourlyRate;
+  const overtimePay   = overtimeHours * hourlyRate * 1.5;
+  const totalPay      = regularPay + overtimePay;
+  return { regularHours, overtimeHours, regularPay, overtimePay, totalPay };
 }

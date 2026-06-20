@@ -7,15 +7,9 @@ export type {
 
 export type {
   TimeEntry,
-  TimeEntryWithEmployee,
   CreateTimeEntryInput,
   UpdateTimeEntryInput,
 } from './time-entry.ts';
-
-export type {
-  WeeklyTimesheet,
-  WeeklyTimesheetStatus,
-} from './weekly-timesheet.ts';
 
 export { getWeekStart, calculateWeeklySummary } from './calculations.ts';
 

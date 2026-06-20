@@ -35,18 +35,13 @@ export async function fetchWeeklySummary(startDate: string): Promise<WeeklySumma
   }));
 }
 
-export async function approveWeek(employeeId: string, weekStart: string): Promise<void> {
+async function updateWeekStatus(employeeId: string, weekStart: string, action: 'approve' | 'reject'): Promise<void> {
   const res = await fetch(
-    `/api/weekly-timesheets/${encodeURIComponent(employeeId)}/${encodeURIComponent(weekStart)}/approve`,
+    `/api/weekly-timesheets/${encodeURIComponent(employeeId)}/${encodeURIComponent(weekStart)}/${action}`,
     { method: 'PATCH' }
   );
-  if (!res.ok) throw new Error('Failed to approve week');
+  if (!res.ok) throw new Error(`Failed to ${action} week`);
 }
 
-export async function rejectWeek(employeeId: string, weekStart: string): Promise<void> {
-  const res = await fetch(
-    `/api/weekly-timesheets/${encodeURIComponent(employeeId)}/${encodeURIComponent(weekStart)}/reject`,
-    { method: 'PATCH' }
-  );
-  if (!res.ok) throw new Error('Failed to reject week');
-}
+export const approveWeek = (e: string, w: string) => updateWeekStatus(e, w, 'approve');
+export const rejectWeek  = (e: string, w: string) => updateWeekStatus(e, w, 'reject');

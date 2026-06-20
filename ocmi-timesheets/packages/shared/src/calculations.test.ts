@@ -6,24 +6,24 @@ describe('calculateWeeklySummary', () => {
 
   it('under 40h: all regular, no overtime', () => {
     const result = calculateWeeklySummary(35, RATE);
-    expect(result).toEqual({ regularHours: 35, overtimeHours: 0, totalPay: 700 });
+    expect(result).toEqual({ regularHours: 35, overtimeHours: 0, regularPay: 700, overtimePay: 0, totalPay: 700 });
   });
 
   it('exactly 40h: no overtime', () => {
     const result = calculateWeeklySummary(40, RATE);
-    expect(result).toEqual({ regularHours: 40, overtimeHours: 0, totalPay: 800 });
+    expect(result).toEqual({ regularHours: 40, overtimeHours: 0, regularPay: 800, overtimePay: 0, totalPay: 800 });
   });
 
   it('over 40h: overtime billed at 1.5×', () => {
     // 40 * 20 + 5 * 20 * 1.5 = 800 + 150 = 950
     const result = calculateWeeklySummary(45, RATE);
-    expect(result).toEqual({ regularHours: 40, overtimeHours: 5, totalPay: 950 });
+    expect(result).toEqual({ regularHours: 40, overtimeHours: 5, regularPay: 800, overtimePay: 150, totalPay: 950 });
   });
 
   it('decimal hours (40.5h): half-hour overtime', () => {
     // 40 * 20 + 0.5 * 20 * 1.5 = 800 + 15 = 815
     const result = calculateWeeklySummary(40.5, RATE);
-    expect(result).toEqual({ regularHours: 40, overtimeHours: 0.5, totalPay: 815 });
+    expect(result).toEqual({ regularHours: 40, overtimeHours: 0.5, regularPay: 800, overtimePay: 15, totalPay: 815 });
   });
 });
 

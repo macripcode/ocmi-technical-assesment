@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CreateTimeEntrySchema } from '@ocmi-timesheets/shared';
 import type { TimeEntry } from '../../types/timeEntry';
 import { Button } from '../Button';
 import { CloseIcon } from '../Icons';
 import styles from './TimeEntryForm.module.css';
+
+const EntryFieldsSchema = CreateTimeEntrySchema.pick({ date: true, hoursWorked: true });
 
 interface TimeEntryFormProps {
   entry?:   TimeEntry;
@@ -18,6 +21,7 @@ export function TimeEntryForm({ entry, onSave, onClose }: TimeEntryFormProps) {
 
   const [date,  setDate]  = useState(entry?.date  ?? '');
   const [hours, setHours] = useState(entry ? String(entry.hoursWorked) : '');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -36,9 +40,13 @@ export function TimeEntryForm({ entry, onSave, onClose }: TimeEntryFormProps) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const h = parseFloat(hours);
-    if (!date || isNaN(h) || h <= 0) return;
-    onSave({ date, hoursWorked: h });
+    const result = EntryFieldsSchema.safeParse({ date, hoursWorked: Number(hours) });
+    if (!result.success) {
+      setError(result.error.issues[0].message);
+      return;
+    }
+    setError(null);
+    onSave(result.data);
   }
 
   return (
@@ -98,6 +106,8 @@ export function TimeEntryForm({ entry, onSave, onClose }: TimeEntryFormProps) {
               required
             />
           </div>
+
+          {error && <p className={styles.error}>{error}</p>}
 
           <div className={styles.footer}>
             <Button type="button" variant="secondary" size="md" onClick={onClose}>

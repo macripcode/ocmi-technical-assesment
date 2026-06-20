@@ -26,7 +26,7 @@ describe('approval lock flow', () => {
       new Request('http://localhost/employees', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Lock Test', hourlyRate: 20 }),
+        body: JSON.stringify({ name: 'Lock Test', lastName: 'Employee', hourlyRate: 20 }),
       })
     );
     expect(empRes.status).toBe(201);
@@ -68,5 +68,59 @@ describe('approval lock flow', () => {
     // 6. Only the original entry should be in the database
     const entries = await prisma.timeEntry.findMany({ where: { employeeId } });
     expect(entries).toHaveLength(1);
+  });
+
+  it('returns 409 and does not modify hours when PATCH is attempted on an approved week entry', async () => {
+    // Step 1: Create a test employee
+    const empRes = await app.fetch(
+      new Request('http://localhost/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Lock Update Test', lastName: 'Employee', hourlyRate: 25 }),
+      })
+    );
+    expect(empRes.status).toBe(201);
+    const employee = (await empRes.json()) as { id: string };
+    employeeId = employee.id;
+
+    // Step 2: Create a time entry — 8 hours on 2024-02-14 (week of Mon 2024-02-12)
+    const entryRes = await app.fetch(
+      new Request('http://localhost/time-entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeId, date: '2024-02-14', hoursWorked: 8 }),
+      })
+    );
+    expect(entryRes.status).toBe(201);
+    const entry = (await entryRes.json()) as { id: string };
+    const timeEntryId = entry.id;
+
+    // Step 3: Approve the week (weekStart = Mon 2024-02-12)
+    const approveRes = await app.fetch(
+      new Request(`http://localhost/weekly-timesheets/${employeeId}/2024-02-12/approve`, {
+        method: 'PATCH',
+      })
+    );
+    expect(approveRes.status).toBe(200);
+    const timesheet = (await approveRes.json()) as { status: string };
+    expect(timesheet.status).toBe('APPROVED');
+
+    // Step 4: Attempt to modify hoursWorked (8 → 10) on the approved entry
+    const updateRes = await app.fetch(
+      new Request(`http://localhost/time-entries/${timeEntryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hoursWorked: 10 }),
+      })
+    );
+
+    // Expected: modification is rejected with 409 Conflict
+    expect(updateRes.status).toBe(409);
+    const body = (await updateRes.json()) as { message: string };
+    expect(body.message).toBe('This week is approved and locked');
+
+    // Assert: hours in DB are still 8 (not 10)
+    const unchanged = await prisma.timeEntry.findUnique({ where: { id: timeEntryId } });
+    expect(unchanged?.hoursWorked).toBe(8);
   });
 });

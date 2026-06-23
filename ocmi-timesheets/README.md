@@ -27,9 +27,3 @@ All project files are inside the ocmi-timesheets folder. Run all commands from t
 8. Start the web client in other terminal and cd ocmi-timesheets (runs on http://localhost:4200):
    npx nx dev web
 
-
-Notes: 
-
-Weaknesis that I found while i was developing the Assesment
-
- - Preserving Historical Payroll Accuracy: Currently, weekly summaries are calculated dynamically from time entries. In a production payroll system, I would persist a payroll snapshot at approval time, including the hourly rate used, regular/overtime hours, and total pay, to preserve historical accuracy if employee rates or overtime rules change later.

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { prisma } from '../lib/prisma';
-import { getWeekStart, calculateWeeklySummary } from '@ocmi-timesheets/shared';
+import { getWeekStart, calculateWeeklySummary, type WeeklyTimesheetStatus } from '@ocmi-timesheets/shared';
 
 export const reportsRoutes = new Hono();
 
@@ -15,16 +15,16 @@ reportsRoutes.get('/weekly', async (c) => {
   const weekEnd   = new Date(weekStart);
   weekEnd.setUTCDate(weekStart.getUTCDate() + 7);
 
-  const [entries, timesheets] = await Promise.all([
-    prisma.timeEntry.findMany({
-      where:   { date: { gte: weekStart, lt: weekEnd } },
-      include: { employee: true },
-    }),
-    prisma.weeklyTimesheet.findMany({ where: { weekStart } }),
-  ]);
+  const entriesPromise = prisma.timeEntry.findMany({
+    where:   { date: { gte: weekStart, lt: weekEnd } },
+    include: { employee: true },
+  });
+  const timesheetsPromise = prisma.weeklyTimesheet.findMany({ where: { weekStart } });
 
-  const timesheetByEmployee = new Map(
-    timesheets.map((t) => [t.employeeId, t.status])
+  const [entries, timesheets] = await Promise.all([entriesPromise, timesheetsPromise]);
+
+  const timesheetByEmployee = new Map<string, WeeklyTimesheetStatus>(
+    timesheets.map((t: { employeeId: string; status: WeeklyTimesheetStatus }) => [t.employeeId, t.status])
   );
 
   const summaryMap = new Map<string, {

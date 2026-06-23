@@ -18,10 +18,13 @@ All project files are inside the ocmi-timesheets folder. Run all commands from t
 5. Apply database migrations:
    npx prisma migrate deploy
 
-6. Start the API (runs on http://localhost:3000):
+6. Generate the Prisma client:
+   npx prisma generate
+
+7. Start the API (runs on http://localhost:3000):
    npx nx serve api
 
-7. Start the web client (runs on http://localhost:4200):
+8. Start the web client (runs on http://localhost:4200):
    npx nx dev web
 
 

@@ -21,15 +21,17 @@ function initials(name: string, lastName: string): string {
 
 // ── Component ─────────────────────────────────────────────────────────
 interface EmployeeCardSelectorProps {
-  employees:  Employee[];
-  selectedId: string;
-  onChange:   (id: string) => void;
+  employees:    Employee[];
+  selectedId:   string;
+  onChange:     (id: string) => void;
+  showInactive?: boolean;
 }
 
 export function EmployeeCardSelector({
   employees,
   selectedId,
   onChange,
+  showInactive = false,
 }: EmployeeCardSelectorProps) {
   const [isOpen,      setIsOpen]      = useState(false);
   const [query,       setQuery]       = useState('');
@@ -38,18 +40,20 @@ export function EmployeeCardSelector({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef     = useRef<HTMLInputElement>(null);
 
-  const active = employees.filter((e) => e.status === 'ACTIVE');
+  const displayList = showInactive
+    ? employees
+    : employees.filter((e) => e.status === 'ACTIVE');
 
   const filtered =
     query.length >= 3
-      ? active.filter((e) => {
+      ? displayList.filter((e) => {
           const q = query.toLowerCase();
           return (
             e.name.toLowerCase().includes(q) ||
             e.lastName.toLowerCase().includes(q)
           );
         })
-      : active;
+      : displayList;
 
   const selected = employees.find((e) => e.id === selectedId);
 
@@ -119,6 +123,9 @@ export function EmployeeCardSelector({
             <span className={styles.selectedName}>
               {selected.name} {selected.lastName}
             </span>
+            {selected.status === 'INACTIVE' && (
+              <span className={styles.inactiveBadge}>Inactive</span>
+            )}
           </>
         )}
         <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>
@@ -174,6 +181,9 @@ export function EmployeeCardSelector({
                   <span className={styles.optionName}>
                     {emp.name} {emp.lastName}
                   </span>
+                  {emp.status === 'INACTIVE' && (
+                    <span className={styles.inactiveBadge}>Inactive</span>
+                  )}
                   {emp.id === selectedId && (
                     <span className={styles.check}>✓</span>
                   )}

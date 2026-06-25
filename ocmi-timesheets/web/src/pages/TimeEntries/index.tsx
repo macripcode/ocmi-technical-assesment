@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { Employee } from '../../types/employee';
 import type { TimeEntry } from '../../types/timeEntry';
 import { Button } from '../../components/Button';
+import { Checkbox } from '../../components/Checkbox';
 import { EmployeeCardSelector } from '../../components/EmployeeCardSelector';
 import { TimeEntryForm } from '../../components/TimeEntryForm';
 import { TimeEntryList } from '../../components/TimeEntryList';
@@ -27,6 +28,7 @@ export function TimeEntriesPage() {
 
   const [employees,          setEmployees]        = useState<Employee[]>([]);
   const [selectedEmployeeId, setSelectedEmployee] = useState('');
+  const [showInactive,       setShowInactive]     = useState(false);
   const [entries,            setEntries]          = useState<TimeEntry[]>([]);
   const [loadingEmp,         setLoadingEmp]       = useState(true);
   const [loadingEntries,     setLoadingEntries]   = useState(false);
@@ -41,19 +43,28 @@ export function TimeEntriesPage() {
     return () => clearTimeout(id);
   }, [toast]);
 
-  // ── Load employees on mount ───────────────────────────────────────
+  // ── Load employees when showInactive toggles ─────────────────────
   useEffect(() => {
-    fetchEmployees(false)
+    let cancelled = false;
+    setLoadingEmp(true);
+
+    fetchEmployees(showInactive)
       .then((data) => {
+        if (cancelled) return;
         setEmployees(data);
-        const first = [...data]
-          .filter((e) => e.status === 'ACTIVE')
-          .sort((a, b) => a.name.localeCompare(b.name))[0];
-        if (first) setSelectedEmployee(first.id);
+        setSelectedEmployee((prev) => {
+          if (prev && data.some((e) => e.id === prev)) return prev;
+          const first = [...data]
+            .filter((e) => e.status === 'ACTIVE')
+            .sort((a, b) => a.name.localeCompare(b.name))[0];
+          return first?.id ?? '';
+        });
       })
-      .catch(() => setToast('No se pudieron cargar los empleados.'))
-      .finally(() => setLoadingEmp(false));
-  }, []);
+      .catch(() => { if (!cancelled) setToast('No se pudieron cargar los empleados.'); })
+      .finally(() => { if (!cancelled) setLoadingEmp(false); });
+
+    return () => { cancelled = true; };
+  }, [showInactive]);
 
   // ── Load entries when employee changes ────────────────────────────
   useEffect(() => {
@@ -186,11 +197,20 @@ export function TimeEntriesPage() {
       {!loadingEmp && employees.length > 0 && (
         <div className={styles.selectorRow}>
           <div className={styles.selectorBlock}>
-            <span className={styles.selectorLabel}>{t('timeEntries.selectEmployee')}</span>
+            <div className={styles.selectorControls}>
+              <span className={styles.selectorLabel}>{t('timeEntries.selectEmployee')}</span>
+              <Checkbox
+                id="show-inactive-te"
+                label={t('employees.showInactive')}
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+              />
+            </div>
             <EmployeeCardSelector
               employees={employees}
               selectedId={selectedEmployeeId}
               onChange={handleEmployeeChange}
+              showInactive={showInactive}
             />
           </div>
 

@@ -15,9 +15,18 @@ interface TimeEntryFormProps {
   onClose:  () => void;
 }
 
+function todayISO(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export function TimeEntryForm({ entry, onSave, onClose }: TimeEntryFormProps) {
   const { t } = useTranslation();
   const isEdit = Boolean(entry);
+  const today  = todayISO();
 
   const [date,  setDate]  = useState(entry?.date  ?? '');
   const [hours, setHours] = useState(entry ? String(entry.hoursWorked) : '');
@@ -40,6 +49,10 @@ export function TimeEntryForm({ entry, onSave, onClose }: TimeEntryFormProps) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (date > today) {
+      setError(t('timeEntries.form.dateFuture'));
+      return;
+    }
     const result = EntryFieldsSchema.safeParse({ date, hoursWorked: Number(hours) });
     if (!result.success) {
       setError(result.error.issues[0].message);
@@ -83,6 +96,7 @@ export function TimeEntryForm({ entry, onSave, onClose }: TimeEntryFormProps) {
               className={styles.input}
               type="date"
               value={date}
+              max={today}
               onChange={(e) => setDate(e.target.value)}
               required
               autoFocus

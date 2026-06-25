@@ -92,6 +92,15 @@
   color:            var(--color-danger);
 }
 
+.iconBtnDisabled {
+  opacity:        0.35;
+  cursor:         not-allowed;
+}
+.iconBtnDisabled:hover {
+  background-color: transparent;
+  color:            var(--color-text-muted);
+}
+
 /* ─── Empty state ─────────────────────────────────────────────────── */
 .empty {
   display:          flex;

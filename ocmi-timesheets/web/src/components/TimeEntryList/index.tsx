@@ -4,9 +4,11 @@ import { EditIcon, DeleteIcon } from '../Icons';
 import styles from './TimeEntryList.module.css';
 
 interface TimeEntryListProps {
-  entries:  TimeEntry[];
-  onEdit:   (entry: TimeEntry) => void;
-  onDelete: (entry: TimeEntry) => void;
+  entries:          TimeEntry[];
+  onEdit:           (entry: TimeEntry) => void;
+  onDelete:         (entry: TimeEntry) => void;
+  isInactive?:      boolean;
+  onInactiveAction?: () => void;
 }
 
 function formatDate(iso: string): string {
@@ -18,7 +20,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function TimeEntryList({ entries, onEdit, onDelete }: TimeEntryListProps) {
+export function TimeEntryList({ entries, onEdit, onDelete, isInactive = false, onInactiveAction }: TimeEntryListProps) {
   const { t } = useTranslation();
 
   if (entries.length === 0) {
@@ -40,18 +42,20 @@ export function TimeEntryList({ entries, onEdit, onDelete }: TimeEntryListProps)
 
           <div className={styles.actions}>
             <button
-              className={`${styles.iconBtn} ${styles.iconBtnEdit}`}
-              onClick={() => onEdit(entry)}
+              className={`${styles.iconBtn} ${styles.iconBtnEdit} ${isInactive ? styles.iconBtnDisabled : ''}`}
+              onClick={() => isInactive ? onInactiveAction?.() : onEdit(entry)}
               title={t('timeEntries.actions.edit')}
               aria-label={t('timeEntries.actions.edit')}
+              aria-disabled={isInactive}
             >
               <EditIcon />
             </button>
             <button
-              className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
-              onClick={() => onDelete(entry)}
+              className={`${styles.iconBtn} ${styles.iconBtnDanger} ${isInactive ? styles.iconBtnDisabled : ''}`}
+              onClick={() => isInactive ? onInactiveAction?.() : onDelete(entry)}
               title={t('timeEntries.actions.delete')}
               aria-label={t('timeEntries.actions.delete')}
+              aria-disabled={isInactive}
             >
               <DeleteIcon />
             </button>

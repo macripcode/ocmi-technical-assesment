@@ -97,6 +97,11 @@
   flex-shrink: 0;
 }
 
+.logBtnDisabled {
+  opacity:        0.5;
+  cursor:         not-allowed;
+}
+
 /* ─── Pagination ──────────────────────────────────────────────────── */
 .pagination {
   display:         flex;

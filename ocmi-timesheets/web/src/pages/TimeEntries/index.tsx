@@ -81,6 +81,10 @@ export function TimeEntriesPage() {
     return () => { cancelled = true; };
   }, [selectedEmployeeId]);
 
+  // ── Selected employee status ──────────────────────────────────────
+  const isSelectedInactive =
+    employees.find((e) => e.id === selectedEmployeeId)?.status === 'INACTIVE';
+
   // ── Pagination ────────────────────────────────────────────────────
   const sorted     = [...entries].sort((a, b) => a.date.localeCompare(b.date));
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
@@ -214,7 +218,13 @@ export function TimeEntriesPage() {
             />
           </div>
 
-          <Button variant="primary" size="md" onClick={openAdd} className={styles.logBtn}>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={isSelectedInactive ? () => setToast(t('timeEntries.inactiveEmployee')) : openAdd}
+            className={`${styles.logBtn}${isSelectedInactive ? ` ${styles.logBtnDisabled}` : ''}`}
+            aria-disabled={isSelectedInactive}
+          >
             {t('timeEntries.addEntry')}
           </Button>
         </div>
@@ -229,6 +239,8 @@ export function TimeEntriesPage() {
             entries={paginated}
             onEdit={openEdit}
             onDelete={handleDelete}
+            isInactive={isSelectedInactive}
+            onInactiveAction={() => setToast(t('timeEntries.inactiveEmployee'))}
           />
 
           {totalPages > 1 && (
